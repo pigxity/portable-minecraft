@@ -10,8 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public final class DownloadBatch {
-    private DownloadBatch() {
-    }
+    private DownloadBatch() {}
 
     public static <T> void run(Collection<T> items, ThrowingConsumer<T> action) throws IOException {
         int workerCount = Math.min(16, Math.max(1, Runtime.getRuntime().availableProcessors()));
@@ -19,10 +18,12 @@ public final class DownloadBatch {
         try {
             List<Future<?>> futures = new ArrayList<>(items.size());
             for (T item : items) {
-                futures.add(executor.submit(() -> {
-                    action.accept(item);
-                    return null;
-                }));
+                futures.add(
+                        executor.submit(
+                                () -> {
+                                    action.accept(item);
+                                    return null;
+                                }));
             }
             for (Future<?> future : futures) {
                 try {

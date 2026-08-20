@@ -10,15 +10,16 @@ import java.util.Map;
 import java.util.Set;
 
 public final class PackageDownloads {
-    private PackageDownloads() {
-    }
+    private PackageDownloads() {}
 
     public static Download client(JsonObject packageJson) {
-        return fromJson("client", packageJson.getAsJsonObject("downloads").getAsJsonObject("client"));
+        return fromJson(
+                "client", packageJson.getAsJsonObject("downloads").getAsJsonObject("client"));
     }
 
     public static Download assetIndex(JsonObject packageJson) {
-        return fromJson(packageJson.getAsJsonObject("assetIndex").get("id").getAsString(),
+        return fromJson(
+                packageJson.getAsJsonObject("assetIndex").get("id").getAsString(),
                 packageJson.getAsJsonObject("assetIndex"));
     }
 
@@ -35,8 +36,12 @@ public final class PackageDownloads {
                 result.add(fromJson(coordinate, downloads.getAsJsonObject("artifact")));
             }
             if (downloads.has("classifiers")) {
-                for (Map.Entry<String, JsonElement> classifier : downloads.getAsJsonObject("classifiers").entrySet()) {
-                    result.add(fromJson(withClassifier(coordinate, classifier.getKey()), classifier.getValue().getAsJsonObject()));
+                for (Map.Entry<String, JsonElement> classifier :
+                        downloads.getAsJsonObject("classifiers").entrySet()) {
+                    result.add(
+                            fromJson(
+                                    withClassifier(coordinate, classifier.getKey()),
+                                    classifier.getValue().getAsJsonObject()));
                 }
             }
         }
@@ -60,12 +65,12 @@ public final class PackageDownloads {
     }
 
     private static Download fromJson(String name, JsonObject json) {
-        return new Download(name,
+        return new Download(
+                name,
                 json.has("path") ? json.get("path").getAsString() : null,
                 json.get("url").getAsString(),
                 json.get("sha1").getAsString());
     }
 
-    public record Download(String name, String path, String url, String sha1) {
-    }
+    public record Download(String name, String path, String url, String sha1) {}
 }

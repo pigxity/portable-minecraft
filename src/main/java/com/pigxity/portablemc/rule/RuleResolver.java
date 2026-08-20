@@ -45,7 +45,8 @@ public final class RuleResolver {
         }
         JsonObject rule = element.getAsJsonObject();
         rejectUnknownKeys(rule, RULE_KEYS, "rule");
-        if (!rule.has("action") || !rule.get("action").isJsonPrimitive()
+        if (!rule.has("action")
+                || !rule.get("action").isJsonPrimitive()
                 || !ACTIONS.contains(rule.get("action").getAsString())) {
             throw unsupported("Unsupported or missing rule action: " + rule);
         }
@@ -94,15 +95,18 @@ public final class RuleResolver {
     private boolean matchesOperatingSystem(JsonObject os) {
         OperatingSystem actual = environment.operatingSystem();
         return (!os.has("name") || os.get("name").getAsString().equals(actual.name()))
-                && (!os.has("version") || Pattern.matches(os.get("version").getAsString(), actual.version()))
-                && (!os.has("arch") || Pattern.matches(os.get("arch").getAsString(), actual.architecture()));
+                && (!os.has("version")
+                        || Pattern.matches(os.get("version").getAsString(), actual.version()))
+                && (!os.has("arch")
+                        || Pattern.matches(os.get("arch").getAsString(), actual.architecture()));
     }
 
     private static void validatePattern(JsonObject object, String key) {
         if (!object.has(key)) {
             return;
         }
-        if (!object.get(key).isJsonPrimitive() || !object.get(key).getAsJsonPrimitive().isString()) {
+        if (!object.get(key).isJsonPrimitive()
+                || !object.get(key).getAsJsonPrimitive().isString()) {
             throw unsupported("Rule " + key + " must be a regex string");
         }
         try {
@@ -112,7 +116,8 @@ public final class RuleResolver {
         }
     }
 
-    private static void rejectUnknownKeys(JsonObject object, Set<String> supported, String context) {
+    private static void rejectUnknownKeys(
+            JsonObject object, Set<String> supported, String context) {
         for (String key : object.keySet()) {
             if (!supported.contains(key)) {
                 throw unsupported("Unsupported " + context + " field: " + key);

@@ -17,9 +17,11 @@ public final class VerifiedDownloader {
     private static final int CONNECT_TIMEOUT_MILLIS = 30_000;
     private static final int READ_TIMEOUT_MILLIS = 120_000;
 
-    public Path downloadVerified(String url, Path destination, String expectedSha1) throws IOException {
+    public Path downloadVerified(String url, Path destination, String expectedSha1)
+            throws IOException {
         Objects.requireNonNull(expectedSha1, "expectedSha1");
-        if (Files.isRegularFile(destination) && expectedSha1.equalsIgnoreCase(Hashing.sha1(destination))) {
+        if (Files.isRegularFile(destination)
+                && expectedSha1.equalsIgnoreCase(Hashing.sha1(destination))) {
             return destination;
         }
         Files.deleteIfExists(destination);
@@ -28,7 +30,12 @@ public final class VerifiedDownloader {
             String actualSha1 = Hashing.sha1(temporary);
             if (!expectedSha1.equalsIgnoreCase(actualSha1)) {
                 throw new DownloadVerificationException(
-                        "SHA-1 mismatch for " + url + ": expected " + expectedSha1 + " but received " + actualSha1);
+                        "SHA-1 mismatch for "
+                                + url
+                                + ": expected "
+                                + expectedSha1
+                                + " but received "
+                                + actualSha1);
             }
             moveIntoPlace(temporary, destination);
             return destination;
@@ -39,7 +46,10 @@ public final class VerifiedDownloader {
 
     public Path downloadWithTtl(String url, Path destination, Duration ttl) throws IOException {
         if (Files.isRegularFile(destination)
-                && Files.getLastModifiedTime(destination).toInstant().plus(ttl).isAfter(Instant.now())) {
+                && Files.getLastModifiedTime(destination)
+                        .toInstant()
+                        .plus(ttl)
+                        .isAfter(Instant.now())) {
             return destination;
         }
         Path temporary = download(url, destination);
@@ -53,7 +63,9 @@ public final class VerifiedDownloader {
 
     private Path download(String url, Path destination) throws IOException {
         Files.createDirectories(destination.getParent());
-        Path temporary = destination.resolveSibling(destination.getFileName() + ".part-" + UUID.randomUUID());
+        Path temporary =
+                destination.resolveSibling(
+                        destination.getFileName() + ".part-" + UUID.randomUUID());
         HttpURLConnection connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
         connection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
         connection.setReadTimeout(READ_TIMEOUT_MILLIS);
@@ -77,7 +89,11 @@ public final class VerifiedDownloader {
 
     private static void moveIntoPlace(Path source, Path destination) throws IOException {
         try {
-            Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            Files.move(
+                    source,
+                    destination,
+                    StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
         } catch (AtomicMoveNotSupportedException ignored) {
             Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING);
         }

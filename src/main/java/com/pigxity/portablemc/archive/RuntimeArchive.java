@@ -17,7 +17,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public final class RuntimeArchive {
-    private static final List<String> RUNTIME_PREFIXES = List.of("libraries/", "assets/", "versions/");
+    private static final List<String> RUNTIME_PREFIXES =
+            List.of("libraries/", "assets/", "versions/");
     private final Path archive;
 
     public RuntimeArchive(Path archive) {
@@ -26,9 +27,16 @@ public final class RuntimeArchive {
 
     public static RuntimeArchive current() throws IOException {
         try {
-            Path location = Path.of(RuntimeArchive.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            Path location =
+                    Path.of(
+                            RuntimeArchive.class
+                                    .getProtectionDomain()
+                                    .getCodeSource()
+                                    .getLocation()
+                                    .toURI());
             if (!Files.isRegularFile(location)) {
-                throw new IOException("The runtime loader must be launched from its bundled JAR: " + location);
+                throw new IOException(
+                        "The runtime loader must be launched from its bundled JAR: " + location);
             }
             return new RuntimeArchive(location);
         } catch (URISyntaxException exception) {
@@ -43,12 +51,14 @@ public final class RuntimeArchive {
             var entries = jar.entries();
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
-                if (entry.isDirectory() || RUNTIME_PREFIXES.stream().noneMatch(entry.getName()::startsWith)) {
+                if (entry.isDirectory()
+                        || RUNTIME_PREFIXES.stream().noneMatch(entry.getName()::startsWith)) {
                     continue;
                 }
                 Path output = root.resolve(entry.getName()).normalize();
                 if (!output.startsWith(root)) {
-                    throw new IOException("Refusing to extract unsafe JAR entry: " + entry.getName());
+                    throw new IOException(
+                            "Refusing to extract unsafe JAR entry: " + entry.getName());
                 }
                 Files.createDirectories(output.getParent());
                 try (InputStream input = jar.getInputStream(entry)) {
@@ -81,10 +91,13 @@ public final class RuntimeArchive {
                 }
             }
             if (matches.size() != 1) {
-                throw new IOException("Expected exactly one packagerules-{version}.json resource but found " + matches.size());
+                throw new IOException(
+                        "Expected exactly one packagerules-{version}.json resource but found "
+                                + matches.size());
             }
-            try (InputStreamReader reader = new InputStreamReader(
-                    jar.getInputStream(matches.getFirst()), StandardCharsets.UTF_8)) {
+            try (InputStreamReader reader =
+                    new InputStreamReader(
+                            jar.getInputStream(matches.getFirst()), StandardCharsets.UTF_8)) {
                 return JsonParser.parseReader(reader).getAsJsonObject();
             }
         }

@@ -1,6 +1,11 @@
 package com.pigxity.portablemc.build.download;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.sun.net.httpserver.HttpServer;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -11,25 +16,22 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 class VerifiedDownloaderTest {
-    @TempDir
-    Path temporaryDirectory;
+    @TempDir Path temporaryDirectory;
 
     @Test
     void verifiedCacheDownloadsOnceAndRejectsInvalidContent() throws Exception {
         byte[] content = "portable minecraft".getBytes(StandardCharsets.UTF_8);
         AtomicInteger requests = new AtomicInteger();
         HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
-        server.createContext("/file", exchange -> {
-            requests.incrementAndGet();
-            exchange.sendResponseHeaders(200, content.length);
-            exchange.getResponseBody().write(content);
-            exchange.close();
-        });
+        server.createContext(
+                "/file",
+                exchange -> {
+                    requests.incrementAndGet();
+                    exchange.sendResponseHeaders(200, content.length);
+                    exchange.getResponseBody().write(content);
+                    exchange.close();
+                });
         server.start();
 
         try {
@@ -42,8 +44,13 @@ class VerifiedDownloaderTest {
 
             assertArrayEquals(content, Files.readAllBytes(cached));
             assertEquals(1, requests.get());
-            assertThrows(DownloadVerificationException.class,
-                    () -> downloader.downloadVerified(url, temporaryDirectory.resolve("bad"), "0000000000000000000000000000000000000000"));
+            assertThrows(
+                    DownloadVerificationException.class,
+                    () ->
+                            downloader.downloadVerified(
+                                    url,
+                                    temporaryDirectory.resolve("bad"),
+                                    "0000000000000000000000000000000000000000"));
         } finally {
             server.stop(0);
         }
@@ -54,12 +61,14 @@ class VerifiedDownloaderTest {
         byte[] content = "manifest".getBytes(StandardCharsets.UTF_8);
         AtomicInteger requests = new AtomicInteger();
         HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
-        server.createContext("/manifest", exchange -> {
-            requests.incrementAndGet();
-            exchange.sendResponseHeaders(200, content.length);
-            exchange.getResponseBody().write(content);
-            exchange.close();
-        });
+        server.createContext(
+                "/manifest",
+                exchange -> {
+                    requests.incrementAndGet();
+                    exchange.sendResponseHeaders(200, content.length);
+                    exchange.getResponseBody().write(content);
+                    exchange.close();
+                });
         server.start();
 
         try {

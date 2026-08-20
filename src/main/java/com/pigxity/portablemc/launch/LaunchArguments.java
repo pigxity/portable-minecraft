@@ -30,11 +30,13 @@ public final class LaunchArguments {
                 continue;
             }
             if (!definition.isJsonObject()) {
-                throw new IllegalArgumentException("Unsupported argument definition: " + definition);
+                throw new IllegalArgumentException(
+                        "Unsupported argument definition: " + definition);
             }
             JsonObject conditional = definition.getAsJsonObject();
             if (!conditional.has("rules") || !conditional.has("value")) {
-                throw new IllegalArgumentException("Conditional argument requires rules and value: " + conditional);
+                throw new IllegalArgumentException(
+                        "Conditional argument requires rules and value: " + conditional);
             }
             if (rules.isAllowed(conditional.getAsJsonArray("rules"))) {
                 addValue(arguments, conditional.get("value"));
@@ -51,13 +53,15 @@ public final class LaunchArguments {
         if (value.isJsonArray()) {
             for (JsonElement item : value.getAsJsonArray()) {
                 if (!item.isJsonPrimitive() || !item.getAsJsonPrimitive().isString()) {
-                    throw new IllegalArgumentException("Argument array values must be strings: " + item);
+                    throw new IllegalArgumentException(
+                            "Argument array values must be strings: " + item);
                 }
                 destination.add(substitute(item.getAsString()));
             }
             return;
         }
-        throw new IllegalArgumentException("Argument value must be a string or string array: " + value);
+        throw new IllegalArgumentException(
+                "Argument value must be a string or string array: " + value);
     }
 
     private String substitute(String value) {
@@ -66,7 +70,10 @@ public final class LaunchArguments {
         while (matcher.find()) {
             String replacement = substitutions.get(matcher.group(1));
             if (replacement == null) {
-                throw new IllegalArgumentException("No value was supplied for argument placeholder ${" + matcher.group(1) + "}");
+                throw new IllegalArgumentException(
+                        "No value was supplied for argument placeholder ${"
+                                + matcher.group(1)
+                                + "}");
             }
             matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
         }

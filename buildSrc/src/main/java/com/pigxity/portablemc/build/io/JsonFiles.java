@@ -15,8 +15,7 @@ import java.nio.file.Path;
 public final class JsonFiles {
     private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private JsonFiles() {
-    }
+    private JsonFiles() {}
 
     public static JsonObject readObject(Path path) throws IOException {
         try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {

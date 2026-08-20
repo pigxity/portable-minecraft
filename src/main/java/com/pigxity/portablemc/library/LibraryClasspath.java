@@ -18,7 +18,8 @@ public final class LibraryClasspath {
     private final RuleResolver rules;
     private final OperatingSystem operatingSystem;
 
-    public LibraryClasspath(Path gameDirectory, RuleResolver rules, OperatingSystem operatingSystem) {
+    public LibraryClasspath(
+            Path gameDirectory, RuleResolver rules, OperatingSystem operatingSystem) {
         this.gameDirectory = gameDirectory;
         this.rules = rules;
         this.operatingSystem = operatingSystem;
@@ -33,7 +34,10 @@ public final class LibraryClasspath {
             if (!ruleAllowed || !classifierMatchesArchitecture(coordinate)) {
                 continue;
             }
-            Path library = gameDirectory.resolve("libraries").resolve(MavenCoordinates.libraryPath(coordinate));
+            Path library =
+                    gameDirectory
+                            .resolve("libraries")
+                            .resolve(MavenCoordinates.libraryPath(coordinate));
             if (!Files.isRegularFile(library)) {
                 throw new IOException("Required library is missing: " + library);
             }

@@ -5,6 +5,7 @@ import com.pigxity.portablemc.build.io.FileTrees;
 import com.pigxity.portablemc.build.io.JsonFiles;
 import com.pigxity.portablemc.build.model.MinecraftPackage;
 import com.pigxity.portablemc.build.model.PackageDownloads;
+
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
@@ -28,23 +29,32 @@ public abstract class PrepareMinecraftClientTask extends MinecraftTask {
 
         PackageDownloads.Download client = PackageDownloads.client(packageJson);
         String version = minecraftPackage.version();
-        FileTrees.copy(cache().client(client.sha1()),
+        FileTrees.copy(
+                cache().client(client.sha1()),
                 output.resolve("versions").resolve(version).resolve("client-" + version + ".jar"));
 
         PackageDownloads.Download index = PackageDownloads.assetIndex(packageJson);
         Path cachedIndex = cache().assetIndex(index.sha1());
-        FileTrees.copy(cachedIndex, output.resolve("assets/indexes").resolve(index.name() + ".json"));
+        FileTrees.copy(
+                cachedIndex, output.resolve("assets/indexes").resolve(index.name() + ".json"));
         for (String hash : PackageDownloads.assetHashes(JsonFiles.readObject(cachedIndex))) {
-            FileTrees.copy(cache().assetObject(hash),
+            FileTrees.copy(
+                    cache().assetObject(hash),
                     output.resolve("assets/objects").resolve(hash.substring(0, 2)).resolve(hash));
         }
 
         for (PackageDownloads.Download library : PackageDownloads.libraries(packageJson)) {
-            FileTrees.copy(cache().library(library.path()), output.resolve("libraries").resolve(library.path()));
+            FileTrees.copy(
+                    cache().library(library.path()),
+                    output.resolve("libraries").resolve(library.path()));
         }
 
-        FileTrees.copy(cache().packageRules(version), output.resolve("packagerules-" + version + ".json"));
-        Files.writeString(output.resolve("main-class"), packageJson.get("mainClass").getAsString(), StandardCharsets.UTF_8);
+        FileTrees.copy(
+                cache().packageRules(version), output.resolve("packagerules-" + version + ".json"));
+        Files.writeString(
+                output.resolve("main-class"),
+                packageJson.get("mainClass").getAsString(),
+                StandardCharsets.UTF_8);
         getLogger().lifecycle("Prepared Minecraft {} runtime resources in {}", version, output);
     }
 }

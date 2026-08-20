@@ -29,12 +29,18 @@ public final class MinecraftLauncher {
 
         RuleEnvironment environment = RuleEnvironment.current();
         RuleResolver ruleResolver = new RuleResolver(environment);
-        List<Path> classpath = new ArrayList<>(new LibraryClasspath(
-                gameDirectory, ruleResolver, environment.operatingSystem())
-                .resolve(packageRules.getAsJsonArray("libraries")));
+        List<Path> classpath =
+                new ArrayList<>(
+                        new LibraryClasspath(
+                                        gameDirectory, ruleResolver, environment.operatingSystem())
+                                .resolve(packageRules.getAsJsonArray("libraries")));
 
         String version = packageRules.get("version").getAsString();
-        Path client = gameDirectory.resolve("versions").resolve(version).resolve("client-" + version + ".jar");
+        Path client =
+                gameDirectory
+                        .resolve("versions")
+                        .resolve(version)
+                        .resolve("client-" + version + ".jar");
         if (!Files.isRegularFile(client)) {
             throw new IllegalStateException("Minecraft client is missing: " + client);
         }
@@ -42,7 +48,8 @@ public final class MinecraftLauncher {
 
         Path natives = gameDirectory.resolve("natives");
         Files.createDirectories(natives);
-        Map<String, String> substitutions = substitutions(gameDirectory, natives, classpath, packageRules);
+        Map<String, String> substitutions =
+                substitutions(gameDirectory, natives, classpath, packageRules);
         LaunchArguments arguments = new LaunchArguments(ruleResolver, substitutions);
         JsonObject argumentDefinitions = packageRules.getAsJsonObject("arguments");
         List<String> jvmArguments = arguments.resolve(argumentDefinitions.getAsJsonArray("jvm"));
@@ -50,7 +57,8 @@ public final class MinecraftLauncher {
         JvmConfiguration.applySystemProperties(jvmArguments);
 
         URL[] urls = classpath.stream().map(MinecraftLauncher::toUrl).toArray(URL[]::new);
-        try (URLClassLoader classLoader = new URLClassLoader(urls, MinecraftLauncher.class.getClassLoader())) {
+        try (URLClassLoader classLoader =
+                new URLClassLoader(urls, MinecraftLauncher.class.getClassLoader())) {
             Thread.currentThread().setContextClassLoader(classLoader);
             invokeMain(classLoader, mainClass, gameArguments);
         }
@@ -72,8 +80,9 @@ public final class MinecraftLauncher {
         values.put("natives_directory", natives.toString());
         values.put("launcher_name", "portable-minecraft");
         values.put("launcher_version", "1.0");
-        values.put("classpath", String.join(File.pathSeparator,
-                classpath.stream().map(Path::toString).toList()));
+        values.put(
+                "classpath",
+                String.join(File.pathSeparator, classpath.stream().map(Path::toString).toList()));
         return values;
     }
 
@@ -85,7 +94,8 @@ public final class MinecraftLauncher {
         }
     }
 
-    private static void invokeMain(URLClassLoader classLoader, String mainClass, List<String> arguments) throws Exception {
+    private static void invokeMain(
+            URLClassLoader classLoader, String mainClass, List<String> arguments) throws Exception {
         Class<?> entrypoint = Class.forName(mainClass, true, classLoader);
         Method main = entrypoint.getMethod("main", String[].class);
         try {

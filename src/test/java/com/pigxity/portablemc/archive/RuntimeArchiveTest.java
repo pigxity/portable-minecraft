@@ -1,5 +1,8 @@
 package com.pigxity.portablemc.archive;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -9,12 +12,8 @@ import java.nio.file.Path;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class RuntimeArchiveTest {
-    @TempDir
-    Path temporaryDirectory;
+    @TempDir Path temporaryDirectory;
 
     @Test
     void extractsOnlyRuntimeTreesAndReadsMetadata() throws Exception {
@@ -40,7 +39,8 @@ class RuntimeArchiveTest {
         assertEquals("26.1", archive.readPackageRules().get("version").getAsString());
     }
 
-    private static void entry(JarOutputStream output, String name, String content) throws Exception {
+    private static void entry(JarOutputStream output, String name, String content)
+            throws Exception {
         output.putNextEntry(new JarEntry(name));
         output.write(content.getBytes(StandardCharsets.UTF_8));
         output.closeEntry();

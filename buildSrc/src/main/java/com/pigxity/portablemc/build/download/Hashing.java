@@ -9,8 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
 final class Hashing {
-    private Hashing() {
-    }
+    private Hashing() {}
 
     static String sha1(Path path) throws IOException {
         try (InputStream input = Files.newInputStream(path)) {

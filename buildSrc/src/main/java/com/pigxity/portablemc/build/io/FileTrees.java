@@ -7,8 +7,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 
 public final class FileTrees {
-    private FileTrees() {
-    }
+    private FileTrees() {}
 
     public static void resetDirectory(Path directory) throws IOException {
         if (Files.exists(directory)) {
