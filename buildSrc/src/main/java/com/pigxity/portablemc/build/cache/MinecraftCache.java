@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 public record MinecraftCache(Path root) {
     public Path manifest() {
-        return root.resolve("metadata/version_manifest_v2.json");
+        return root.resolve("version_manifest_v2.json");
     }
 
     public Path versionPackage(String sha1) {

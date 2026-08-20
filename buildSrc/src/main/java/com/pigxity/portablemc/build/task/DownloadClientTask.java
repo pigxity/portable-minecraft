@@ -12,8 +12,8 @@ public abstract class DownloadClientTask extends MinecraftTask {
     @TaskAction
     public void downloadClient() throws Exception {
         PackageDownloads.Download client = PackageDownloads.client(cachedPackage().json());
+        getLogger().lifecycle("Downloading or verifying Minecraft {} client", getMinecraftVersion().get());
         new VerifiedDownloader()
                 .downloadVerified(client.url(), cache().client(client.sha1()), client.sha1());
-        getLogger().lifecycle("Cached Minecraft {} client", getMinecraftVersion().get());
     }
 }

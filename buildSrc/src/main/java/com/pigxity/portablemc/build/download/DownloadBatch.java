@@ -13,34 +13,35 @@ public final class DownloadBatch {
     private DownloadBatch() {}
 
     public static <T> void run(Collection<T> items, ThrowingConsumer<T> action) throws IOException {
-        int workerCount = Math.min(16, Math.max(1, Runtime.getRuntime().availableProcessors()));
-        ExecutorService executor = Executors.newFixedThreadPool(workerCount);
-        try {
-            List<Future<?>> futures = new ArrayList<>(items.size());
-            for (T item : items) {
-                futures.add(
-                        executor.submit(
-                                () -> {
-                                    action.accept(item);
-                                    return null;
-                                }));
-            }
-            for (Future<?> future : futures) {
-                try {
-                    future.get();
-                } catch (InterruptedException exception) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("Download interrupted", exception);
-                } catch (ExecutionException exception) {
-                    Throwable cause = exception.getCause();
-                    if (cause instanceof IOException ioException) {
-                        throw ioException;
-                    }
-                    throw new IOException("Download failed", cause);
+        int workerCount = Math.clamp(Runtime.getRuntime().availableProcessors(), 1, 16);
+        try (ExecutorService executor = Executors.newFixedThreadPool(workerCount)) {
+            try {
+                List<Future<?>> futures = new ArrayList<>(items.size());
+                for (T item : items) {
+                    futures.add(
+                            executor.submit(
+                                    () -> {
+                                        action.accept(item);
+                                        return null;
+                                    }));
                 }
+                for (Future<?> future : futures) {
+                    try {
+                        future.get();
+                    } catch (InterruptedException exception) {
+                        Thread.currentThread().interrupt();
+                        throw new IOException("Download interrupted", exception);
+                    } catch (ExecutionException exception) {
+                        Throwable cause = exception.getCause();
+                        if (cause instanceof IOException ioException) {
+                            throw ioException;
+                        }
+                        throw new IOException("Download failed", cause);
+                    }
+                }
+            } finally {
+                executor.shutdownNow();
             }
-        } finally {
-            executor.shutdownNow();
         }
     }
 

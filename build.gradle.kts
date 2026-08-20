@@ -3,11 +3,14 @@ plugins {
     id("com.pigxity.portable-minecraft")
 }
 
-group = "com.pigxity"
-version = "1.0-SNAPSHOT"
+group = providers.gradleProperty("group").get()
+version = providers.gradleProperty("version").get()
+
+val minecraftVersion = providers.gradleProperty("minecraftVersion").get()
+val projectMainClass = providers.gradleProperty("mainClass").get()
 
 portableMinecraft {
-    version.set("26.1")
+    version.set(minecraftVersion)
     manifestTtlHours.set(24)
 }
 
@@ -25,7 +28,7 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(26))
     }
 }
 
@@ -36,10 +39,25 @@ tasks.test {
 tasks.jar {
     archiveBaseName.set("portable-minecraft-bundler")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest.attributes["Main-Class"] = "com.pigxity.portablemc.Main"
+    manifest.attributes["Main-Class"] = projectMainClass
     from({
         configurations.runtimeClasspath.get().map { dependency ->
             if (dependency.isDirectory) dependency else zipTree(dependency)
         }
     })
+}
+
+val runDirectory = layout.buildDirectory.dir("run")
+
+tasks.register<JavaExec>("runClient") {
+    dependsOn(tasks.build)
+
+    javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+    classpath(tasks.jar.flatMap { it.archiveFile })
+    mainClass.set(projectMainClass)
+    workingDir(runDirectory)
+
+    doFirst {
+        runDirectory.get().asFile.mkdirs()
+    }
 }
