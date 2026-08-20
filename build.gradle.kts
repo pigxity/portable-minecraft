@@ -28,7 +28,7 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(26))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
 
@@ -37,7 +37,7 @@ tasks.test {
 }
 
 tasks.jar {
-    archiveBaseName.set("portable-minecraft-bundler")
+    archiveBaseName.set("portable-minecraft")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest.attributes["Main-Class"] = projectMainClass
     from({
