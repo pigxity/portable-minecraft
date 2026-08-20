@@ -7,10 +7,15 @@ A Minecraft client bundler that builds a self-contained jar for the game, allowi
 Note: I cannot publish releases of the project as it would violate Minecraft's EULA; therefore, you must build it from source.
 
 Simply run the gradle `build` task. It downloads and keeps a cache of the client jar, assets, and libraries, adds them to resources, and compiles the project.
-You may modify the `minecraftVersion` property to change the target version.
+You may optionally modify the `minecraftVersion` property to change the target version.
 
 ```bash
 ./gradlew build "-PminecraftVersion=26.2"
+```
+
+For development, you could use the `runClient` task to run the project.
+```bash
+./gradlew runClient
 ```
 
 ## Usage
