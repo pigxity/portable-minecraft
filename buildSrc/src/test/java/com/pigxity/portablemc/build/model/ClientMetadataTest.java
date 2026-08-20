@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 class ClientMetadataTest {
     @Test
-    void createsRuntimeMetadataIncludingTheStableClientJarPath() {
+    void createsRuntimeMetadataIncludingTheVersionedClientJarPath() {
         JsonObject packageJson =
                 JsonParser.parseString(
                                 """
@@ -28,6 +28,6 @@ class ClientMetadataTest {
         assertEquals("26.2", metadata.getProperty("version"));
         assertEquals("release", metadata.getProperty("versionType"));
         assertEquals("26", metadata.getProperty("assetIndex"));
-        assertEquals("./versions/26.2/client.jar", metadata.getProperty("clientJarPath"));
+        assertEquals("./versions/26.2/26.2.jar", metadata.getProperty("clientJarPath"));
     }
 }

@@ -64,7 +64,7 @@ class RuntimeResourcesTest {
         assertTrue(Files.isRegularFile(output.resolve("packagerules.json")));
         assertEquals(
                 "client",
-                Files.readString(output.resolve("overrides/versions/26.2/client.jar")));
+                Files.readString(output.resolve("overrides/versions/26.2/26.2.jar")));
         assertEquals(
                 "library",
                 Files.readString(
@@ -80,7 +80,7 @@ class RuntimeResourcesTest {
                 Files.newBufferedReader(output.resolve("clientmeta.properties"))) {
             metadata.load(reader);
         }
-        assertEquals("./versions/26.2/client.jar", metadata.getProperty("clientJarPath"));
+        assertEquals("./versions/26.2/26.2.jar", metadata.getProperty("clientJarPath"));
     }
 
     private static void write(Path path, String content) throws Exception {

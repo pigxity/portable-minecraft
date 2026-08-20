@@ -24,7 +24,7 @@ public final class RuntimeResources {
         String version = minecraftPackage.version();
         FileTrees.copy(
                 cache.client(client.sha1()),
-                overrides.resolve("versions").resolve(version).resolve("client.jar"));
+                overrides.resolve(ClientMetadata.clientJarPath(version)));
 
         PackageDownloads.Download index = PackageDownloads.assetIndex(packageJson);
         Path cachedIndex = cache.assetIndex(index.sha1());

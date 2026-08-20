@@ -42,8 +42,13 @@ public final class RuntimeArchive {
     }
 
     public void extractOverrides(Path destination) throws IOException {
+        long startTime = System.nanoTime();
+        int replacedFiles = 0;
+        int skippedFiles = 0;
+
         Path root = destination.toAbsolutePath().normalize();
         Files.createDirectories(root);
+
         try (JarFile jar = new JarFile(archive.toFile())) {
             var entries = jar.entries();
             while (entries.hasMoreElements()) {
@@ -52,23 +57,36 @@ public final class RuntimeArchive {
                         || !entry.getName().startsWith(OVERRIDES_PREFIX)) {
                     continue;
                 }
+
                 String relativeName = entry.getName().substring(OVERRIDES_PREFIX.length());
                 Path output = root.resolve(relativeName).normalize();
                 if (!output.startsWith(root)) {
                     throw new IOException(
                             "Refusing to extract unsafe JAR entry: " + entry.getName());
                 }
+
                 Files.createDirectories(output.getParent());
+                boolean existingFile = Files.isRegularFile(output);
                 try (InputStream input = jar.getInputStream(entry)) {
-                    if (Files.isRegularFile(output) && hashesMatch(input, output)) {
+                    if (existingFile && hashesMatch(input, output)) {
+                        skippedFiles++;
                         continue;
                     }
                 }
+
                 try (InputStream input = jar.getInputStream(entry)) {
                     Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
                 }
+
+                replacedFiles++;
             }
         }
+
+        long elapsedMillis = (System.nanoTime() - startTime) / 1_000_000;
+        final int total = skippedFiles + replacedFiles;
+
+        Main.log(String.format("Processed %d files in %dms; %d skipped (cached), %d replaced/extracted",
+                total, elapsedMillis, skippedFiles, replacedFiles));
     }
 
     private static boolean hashesMatch(InputStream expected, Path actual) throws IOException {

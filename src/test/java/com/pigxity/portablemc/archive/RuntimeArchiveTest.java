@@ -25,7 +25,7 @@ class RuntimeArchiveTest {
         try (JarOutputStream output = new JarOutputStream(Files.newOutputStream(jar))) {
             entry(output, "overrides/libraries/example.jar", "library");
             entry(output, "overrides/assets/indexes/26.json", "{}");
-            entry(output, "overrides/versions/26.1/client.jar", "client");
+            entry(output, "overrides/versions/26.1/26.1.jar", "client");
             entry(output, "overrides/config/new-file.txt", "automatic");
             entry(output, "unrelated.txt", "ignored");
         }
@@ -36,7 +36,7 @@ class RuntimeArchiveTest {
 
         assertTrue(Files.isRegularFile(destination.resolve("libraries/example.jar")));
         assertTrue(Files.isRegularFile(destination.resolve("assets/indexes/26.json")));
-        assertTrue(Files.isRegularFile(destination.resolve("versions/26.1/client.jar")));
+        assertTrue(Files.isRegularFile(destination.resolve("versions/26.1/26.1.jar")));
         assertTrue(Files.isRegularFile(destination.resolve("config/new-file.txt")));
         assertTrue(Files.notExists(destination.resolve("unrelated.txt")));
 

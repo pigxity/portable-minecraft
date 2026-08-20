@@ -21,8 +21,12 @@ public final class ClientMetadata {
         metadata.setProperty(
                 "assetIndex",
                 packageJson.getAsJsonObject("assetIndex").get("id").getAsString());
-        metadata.setProperty("clientJarPath", "./versions/" + version + "/client.jar");
+        metadata.setProperty("clientJarPath", clientJarPath(version));
         return metadata;
+    }
+
+    public static String clientJarPath(String version) {
+        return "./versions/" + version + "/" + version + ".jar";
     }
 
     public static void write(Path path, Properties metadata) throws IOException {

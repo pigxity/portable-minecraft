@@ -17,14 +17,14 @@ class ClientMetadataTest {
                         version=26.2
                         versionType=release
                         assetIndex=32
-                        clientJarPath=./versions/26.2/client.jar
+                        clientJarPath=./versions/26.2/26.2.jar
                         """);
 
         assertEquals("net.minecraft.client.main.Main", metadata.mainClass());
         assertEquals("26.2", metadata.version());
         assertEquals("release", metadata.versionType());
         assertEquals("32", metadata.assetIndex());
-        assertEquals(Path.of("./versions/26.2/client.jar"), metadata.clientJarPath());
+        assertEquals(Path.of("./versions/26.2/26.2.jar"), metadata.clientJarPath());
     }
 
     @Test

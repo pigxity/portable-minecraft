@@ -21,7 +21,7 @@ class MinecraftLaunchPlanTest {
 
     @Test
     void combinesMetadataRulesAndEveryStructuredCliArgumentType() throws Exception {
-        Path client = gameDirectory.resolve("versions/26.2/client.jar");
+        Path client = gameDirectory.resolve("versions/26.2/26.2.jar");
         Files.createDirectories(client.getParent());
         Files.createFile(client);
         ClientMetadata metadata =
@@ -30,7 +30,7 @@ class MinecraftLaunchPlanTest {
                         "26.2",
                         "release",
                         "32",
-                        Path.of("./versions/26.2/client.jar"));
+                        Path.of("./versions/26.2/26.2.jar"));
         JsonObject packageRules =
                 JsonParser.parseString(
                                 """
