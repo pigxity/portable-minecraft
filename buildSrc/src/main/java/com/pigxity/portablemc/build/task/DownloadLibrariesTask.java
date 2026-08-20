@@ -14,7 +14,7 @@ import java.util.List;
 public abstract class DownloadLibrariesTask extends MinecraftTask {
     @TaskAction
     public void downloadLibraries() throws Exception {
-        List<PackageDownloads.Download> libraries =
+        List<PackageDownloads.LibraryArtifact> libraries =
                 PackageDownloads.libraries(cachedPackage().json());
         VerifiedDownloader downloader = new VerifiedDownloader();
         getLogger()

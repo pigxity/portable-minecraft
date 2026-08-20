@@ -1,11 +1,15 @@
 package com.pigxity.portablemc.archive;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.google.gson.JsonParser;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +26,7 @@ class RuntimeArchiveTest {
             entry(output, "libraries/example.jar", "library");
             entry(output, "assets/indexes/26.json", "{}");
             entry(output, "versions/26.1/client-26.1.jar", "client");
-            entry(output, "packagerules-26.1.json", "{\"version\":\"26.1\"}");
+            entry(output, "packagerules.json", "{\"version\":\"26.1\"}");
             entry(output, "main-class", "example.Main");
             entry(output, "unrelated.txt", "ignored");
         }
@@ -35,8 +39,14 @@ class RuntimeArchiveTest {
         assertTrue(Files.isRegularFile(destination.resolve("assets/indexes/26.json")));
         assertTrue(Files.isRegularFile(destination.resolve("versions/26.1/client-26.1.jar")));
         assertTrue(Files.notExists(destination.resolve("unrelated.txt")));
-        assertEquals("example.Main", archive.readMainClass());
-        assertEquals("26.1", archive.readPackageRules().get("version").getAsString());
+        assertEquals("example.Main", archive.readFile("main-class"));
+        assertEquals(
+                "26.1",
+                JsonParser.parseString(archive.readFile("packagerules.json"))
+                        .getAsJsonObject()
+                        .get("version")
+                        .getAsString());
+        assertThrows(IOException.class, () -> archive.readFile("missing-file"));
     }
 
     private static void entry(JarOutputStream output, String name, String content)

@@ -1,6 +1,8 @@
 package com.pigxity.portablemc.launch;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.pigxity.portablemc.Main;
 import com.pigxity.portablemc.archive.RuntimeArchive;
 import com.pigxity.portablemc.library.LibraryClasspath;
 import com.pigxity.portablemc.rule.RuleEnvironment;
@@ -13,22 +15,25 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class MinecraftLauncher {
-    public void launch(Path workingDirectory) throws Exception {
+    public void launch(Path workingDirectory, String[] minecraftArguments) throws Exception {
         Path gameDirectory = workingDirectory.toAbsolutePath().normalize();
         RuntimeArchive archive = RuntimeArchive.current();
 
+        Main.log("Extracting required files");
+
         archive.extractRuntimeTrees(gameDirectory);
-        JsonObject packageRules = archive.readPackageRules();
-        String mainClass = archive.readMainClass();
+        JsonObject packageRules =
+                JsonParser.parseString(archive.readFile("packagerules.json")).getAsJsonObject();
+        String mainClass = archive.readFile("main-class").trim();
 
         RuleEnvironment environment = RuleEnvironment.current();
         RuleResolver ruleResolver = new RuleResolver(environment);
+
+        Main.log("Loading libraries, OS: " + environment.operatingSystem());
+
         List<Path> classpath =
                 new ArrayList<>(
                         new LibraryClasspath(
@@ -53,13 +58,21 @@ public final class MinecraftLauncher {
         LaunchArguments arguments = new LaunchArguments(ruleResolver, substitutions);
         JsonObject argumentDefinitions = packageRules.getAsJsonObject("arguments");
         List<String> jvmArguments = arguments.resolve(argumentDefinitions.getAsJsonArray("jvm"));
-        List<String> gameArguments = arguments.resolve(argumentDefinitions.getAsJsonArray("game"));
+        List<String> gameArguments = mergeArgs(arguments.resolve(
+                argumentDefinitions.getAsJsonArray("game")), Arrays.asList(minecraftArguments)
+        );
+
+        Main.log("JVM arguments: " + jvmArguments);
+        Main.log("Minecraft arguments: " + gameArguments);
+
         JvmConfiguration.applySystemProperties(jvmArguments);
 
         URL[] urls = classpath.stream().map(MinecraftLauncher::toUrl).toArray(URL[]::new);
         try (URLClassLoader classLoader =
                 new URLClassLoader(urls, MinecraftLauncher.class.getClassLoader())) {
             Thread.currentThread().setContextClassLoader(classLoader);
+
+            Main.log("Starting Minecraft!");
             invokeMain(classLoader, mainClass, gameArguments);
         }
     }
@@ -110,5 +123,25 @@ public final class MinecraftLauncher {
             }
             throw exception;
         }
+    }
+
+    private static List<String> mergeArgs(List<String> first, List<String> second) {
+        Map<String, String> merged = new LinkedHashMap<>();
+
+        for (int i = 0; i < first.size(); i += 2) {
+            merged.put(first.get(i), first.get(i + 1));
+        }
+
+        for (int i = 0; i < second.size(); i += 2) {
+            merged.put(second.get(i), second.get(i + 1));
+        }
+
+        List<String> result = new ArrayList<>();
+        merged.forEach((key, value) -> {
+            result.add(key);
+            result.add(value);
+        });
+
+        return result;
     }
 }

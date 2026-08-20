@@ -1,17 +1,12 @@
 package com.pigxity.portablemc.archive;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -62,43 +57,22 @@ public final class RuntimeArchive {
                 }
                 Files.createDirectories(output.getParent());
                 try (InputStream input = jar.getInputStream(entry)) {
-                    Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
+                    if (input.hashCode() != output.hashCode()) {
+                        Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
+                    }
                 }
             }
         }
     }
 
-    public String readMainClass() throws IOException {
+    public String readFile(String filename) throws IOException {
         try (JarFile jar = new JarFile(archive.toFile())) {
-            JarEntry entry = jar.getJarEntry("main-class");
+            JarEntry entry = jar.getJarEntry(filename);
             if (entry == null) {
-                throw new IOException("Bundled resource main-class is missing");
+                throw new IOException("Bundled resource " + filename + " is missing");
             }
             try (InputStream input = jar.getInputStream(entry)) {
-                return new String(input.readAllBytes(), StandardCharsets.UTF_8).trim();
-            }
-        }
-    }
-
-    public JsonObject readPackageRules() throws IOException {
-        try (JarFile jar = new JarFile(archive.toFile())) {
-            List<JarEntry> matches = new ArrayList<>();
-            var entries = jar.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                if (!entry.isDirectory() && entry.getName().matches("packagerules-[^/]+\\.json")) {
-                    matches.add(entry);
-                }
-            }
-            if (matches.size() != 1) {
-                throw new IOException(
-                        "Expected exactly one packagerules-{version}.json resource but found "
-                                + matches.size());
-            }
-            try (InputStreamReader reader =
-                    new InputStreamReader(
-                            jar.getInputStream(matches.getFirst()), StandardCharsets.UTF_8)) {
-                return JsonParser.parseReader(reader).getAsJsonObject();
+                return new String(input.readAllBytes(), StandardCharsets.UTF_8);
             }
         }
     }

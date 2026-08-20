@@ -43,14 +43,15 @@ public abstract class PrepareMinecraftClientTask extends MinecraftTask {
                     output.resolve("assets/objects").resolve(hash.substring(0, 2)).resolve(hash));
         }
 
-        for (PackageDownloads.Download library : PackageDownloads.libraries(packageJson)) {
+        for (PackageDownloads.LibraryArtifact library :
+                PackageDownloads.libraries(packageJson)) {
             FileTrees.copy(
                     cache().library(library.path()),
                     output.resolve("libraries").resolve(library.path()));
         }
 
         FileTrees.copy(
-                cache().packageRules(version), output.resolve("packagerules-" + version + ".json"));
+                cache().packageRules(version), output.resolve("packagerules.json"));
         Files.writeString(
                 output.resolve("main-class"),
                 packageJson.get("mainClass").getAsString(),

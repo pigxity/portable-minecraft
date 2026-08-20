@@ -1,7 +1,6 @@
 package com.pigxity.portablemc.build.model;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.LinkedHashMap;
@@ -19,25 +18,9 @@ public final class PackageRules {
         output.add("arguments", packageJson.getAsJsonObject("arguments").deepCopy());
 
         Map<String, JsonArray> rulesByCoordinate = new LinkedHashMap<>();
-        for (JsonElement element : packageJson.getAsJsonArray("libraries")) {
-            JsonObject library = element.getAsJsonObject();
-            JsonArray rules =
-                    library.has("rules") ? library.getAsJsonArray("rules") : new JsonArray();
-            String coordinate = library.get("name").getAsString();
-            JsonObject downloads = library.getAsJsonObject("downloads");
-            if (downloads == null) {
-                continue;
-            }
-            if (downloads.has("artifact")) {
-                rulesByCoordinate.put(coordinate, rules.deepCopy());
-            }
-            if (downloads.has("classifiers")) {
-                for (String classifier : downloads.getAsJsonObject("classifiers").keySet()) {
-                    rulesByCoordinate.put(
-                            PackageDownloads.withClassifier(coordinate, classifier),
-                            rules.deepCopy());
-                }
-            }
+        for (PackageDownloads.LibraryArtifact library :
+                PackageDownloads.libraries(packageJson)) {
+            rulesByCoordinate.put(library.name(), library.rules().deepCopy());
         }
 
         JsonArray libraries = new JsonArray();

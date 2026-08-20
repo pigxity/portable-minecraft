@@ -1,5 +1,6 @@
 package com.pigxity.portablemc.build.model;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -23,24 +24,29 @@ public final class PackageDownloads {
                 packageJson.getAsJsonObject("assetIndex"));
     }
 
-    public static List<Download> libraries(JsonObject packageJson) {
-        List<Download> result = new ArrayList<>();
+    public static List<LibraryArtifact> libraries(JsonObject packageJson) {
+        List<LibraryArtifact> result = new ArrayList<>();
         for (JsonElement element : packageJson.getAsJsonArray("libraries")) {
             JsonObject library = element.getAsJsonObject();
             String coordinate = library.get("name").getAsString();
+            JsonArray rules =
+                    library.has("rules") ? library.getAsJsonArray("rules") : new JsonArray();
             JsonObject downloads = library.getAsJsonObject("downloads");
             if (downloads == null) {
                 continue;
             }
             if (downloads.has("artifact")) {
-                result.add(fromJson(coordinate, downloads.getAsJsonObject("artifact")));
+                result.add(
+                        libraryArtifact(
+                                coordinate, rules, downloads.getAsJsonObject("artifact")));
             }
             if (downloads.has("classifiers")) {
                 for (Map.Entry<String, JsonElement> classifier :
                         downloads.getAsJsonObject("classifiers").entrySet()) {
                     result.add(
-                            fromJson(
+                            libraryArtifact(
                                     withClassifier(coordinate, classifier.getKey()),
+                                    rules,
                                     classifier.getValue().getAsJsonObject()));
                 }
             }
@@ -72,5 +78,19 @@ public final class PackageDownloads {
                 json.get("sha1").getAsString());
     }
 
+    private static LibraryArtifact libraryArtifact(
+            String name, JsonArray rules, JsonObject json) {
+        Download download = fromJson(name, json);
+        return new LibraryArtifact(
+                download.name(),
+                download.path(),
+                download.url(),
+                download.sha1(),
+                rules.deepCopy());
+    }
+
     public record Download(String name, String path, String url, String sha1) {}
+
+    public record LibraryArtifact(
+            String name, String path, String url, String sha1, JsonArray rules) {}
 }
