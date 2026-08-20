@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public final class LibraryClasspath {
     private final Path gameDirectory;
@@ -38,7 +37,9 @@ public final class LibraryClasspath {
             String coordinate = definition.get("name").getAsString();
             boolean ruleAllowed =
                     rules.isAllowed(ruleParser.parse(definition.getAsJsonArray("rules")));
-            if (!ruleAllowed || !classifierMatchesArchitecture(coordinate)) {
+            if (!ruleAllowed
+                    || !LibraryClassifier.fromCoordinate(coordinate)
+                            .supports(operatingSystem.architecture())) {
                 continue;
             }
             Path library =
@@ -51,31 +52,5 @@ public final class LibraryClasspath {
             libraries.add(library.toAbsolutePath().normalize());
         }
         return List.copyOf(libraries);
-    }
-
-    private boolean classifierMatchesArchitecture(String coordinate) {
-        String[] parts = coordinate.split(":", -1);
-        if (parts.length != 4) {
-            return true;
-        }
-        String classifier = parts[3].toLowerCase(Locale.ROOT);
-        String architecture = operatingSystem.architecture().toLowerCase(Locale.ROOT);
-        boolean arm64 = architecture.equals("aarch64") || architecture.equals("arm64");
-        boolean x86 = architecture.equals("x86") || architecture.matches("i[3-6]86");
-        boolean x64 = architecture.equals("amd64") || architecture.equals("x86_64");
-
-        if (classifier.contains("arm64") || classifier.contains("aarch_64")) {
-            return arm64;
-        }
-        if (classifier.contains("x86_64")) {
-            return x64;
-        }
-        if (classifier.endsWith("-x86")) {
-            return x86;
-        }
-        if (classifier.startsWith("natives-")) {
-            return x64;
-        }
-        return true;
     }
 }
