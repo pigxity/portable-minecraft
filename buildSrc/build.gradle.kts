@@ -18,7 +18,7 @@ gradlePlugin {
     plugins {
         create("portableMinecraft") {
             id = "com.pigxity.portable-minecraft"
-            implementationClass = "com.pigxity.portablemc.build.PortableMinecraftPlugin"
+            implementationClass = "com.pigxity.portablemc.build.plugin.PortableMinecraftPlugin"
         }
     }
 }
