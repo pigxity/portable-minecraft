@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.google.gson.JsonParser;
 import com.pigxity.portablemc.platform.OperatingSystem;
 import com.pigxity.portablemc.rule.RuleEnvironment;
+import com.pigxity.portablemc.rule.RuleParser;
 import com.pigxity.portablemc.rule.RuleResolver;
 import com.pigxity.portablemc.rule.UnsupportedRuleException;
 
@@ -37,6 +38,7 @@ class LibraryClasspathTest {
         LibraryClasspath classpath =
                 new LibraryClasspath(
                         gameDirectory,
+                        new RuleParser(),
                         new RuleResolver(environment),
                         environment.operatingSystem());
 
@@ -62,6 +64,7 @@ class LibraryClasspathTest {
         LibraryClasspath classpath =
                 new LibraryClasspath(
                         gameDirectory,
+                        new RuleParser(),
                         new RuleResolver(environment),
                         environment.operatingSystem());
         assertThrows(

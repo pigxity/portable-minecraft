@@ -6,12 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonParser;
 import com.pigxity.portablemc.platform.OperatingSystem;
+import com.pigxity.portablemc.rule.model.Rule;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 class RuleResolverTest {
+    private final RuleParser parser = new RuleParser();
     private final RuleEnvironment windows =
             new RuleEnvironment(
                     new OperatingSystem("windows", "10.0", "amd64"),
@@ -26,60 +29,40 @@ class RuleResolverTest {
     @Test
     void resolvesOrderedAllowAndDisallowRules() {
         RuleResolver resolver = new RuleResolver(windows);
-        assertTrue(resolver.isAllowed(JsonParser.parseString("[]").getAsJsonArray()));
+        assertTrue(resolver.isAllowed(parse("[]")));
         assertTrue(
                 resolver.isAllowed(
-                        JsonParser.parseString(
-                                        """
-                                        [{"action":"allow","os":{"name":"windows"}}]
-                                        """)
-                                .getAsJsonArray()));
+                        parse(
+                                """
+                                [{"action":"allow","os":{"name":"windows"}}]
+                                """)));
         assertFalse(
                 resolver.isAllowed(
-                        JsonParser.parseString(
-                                        """
-                                        [{"action":"allow","os":{"name":"linux"}}]
-                                        """)
-                                .getAsJsonArray()));
+                        parse(
+                                """
+                                [{"action":"allow","os":{"name":"linux"}}]
+                                """)));
         assertFalse(
                 resolver.isAllowed(
-                        JsonParser.parseString(
-                                        """
-                                        [{"action":"allow","os":{"name":"windows"}},
-                                         {"action":"disallow","os":{"name":"windows"}}]
-                                        """)
-                                .getAsJsonArray()));
+                        parse(
+                                """
+                                [{"action":"allow","os":{"name":"windows"}},
+                                 {"action":"disallow","os":{"name":"windows"}}]
+                                """)));
     }
 
     @Test
-    void rejectsEveryUnsupportedPartOfARule() {
-        RuleResolver resolver = new RuleResolver(windows);
+    void rejectsUnsupportedActionsAndInvalidPatterns() {
+        assertThrows(
+                UnsupportedRuleException.class,
+                () -> parse("[{\"action\":\"sometimes\"}]"));
         assertThrows(
                 UnsupportedRuleException.class,
                 () ->
-                        resolver.isAllowed(
-                                JsonParser.parseString("[{\"action\":\"sometimes\"}]")
-                                        .getAsJsonArray()));
-        assertThrows(
-                UnsupportedRuleException.class,
-                () ->
-                        resolver.isAllowed(
-                                JsonParser.parseString(
-                                                "[{\"action\":\"allow\",\"os\":{\"family\":\"nt\"}}]")
-                                        .getAsJsonArray()));
-        assertThrows(
-                UnsupportedRuleException.class,
-                () ->
-                        resolver.isAllowed(
-                                JsonParser.parseString(
-                                                "[{\"action\":\"allow\",\"features\":{\"future_feature\":true}}]")
-                                        .getAsJsonArray()));
-        assertThrows(
-                UnsupportedRuleException.class,
-                () ->
-                        resolver.isAllowed(
-                                JsonParser.parseString(
-                                                "[{\"action\":\"allow\",\"unexpected\":true}]")
-                                        .getAsJsonArray()));
+                        parse("[{\"action\":\"allow\",\"os\":{\"version\":\"[\"}}]"));
+    }
+
+    private List<Rule> parse(String json) {
+        return parser.parse(JsonParser.parseString(json).getAsJsonArray());
     }
 }

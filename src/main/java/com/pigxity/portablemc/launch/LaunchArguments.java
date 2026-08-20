@@ -3,6 +3,7 @@ package com.pigxity.portablemc.launch;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.pigxity.portablemc.rule.RuleParser;
 import com.pigxity.portablemc.rule.RuleResolver;
 
 import java.util.ArrayList;
@@ -14,10 +15,13 @@ import java.util.regex.Pattern;
 public final class LaunchArguments {
     private static final Pattern PLACEHOLDER = Pattern.compile("\\$\\{([^}]+)}");
 
+    private final RuleParser ruleParser;
     private final RuleResolver rules;
     private final Map<String, String> substitutions;
 
-    public LaunchArguments(RuleResolver rules, Map<String, String> substitutions) {
+    public LaunchArguments(
+            RuleParser ruleParser, RuleResolver rules, Map<String, String> substitutions) {
+        this.ruleParser = ruleParser;
         this.rules = rules;
         this.substitutions = Map.copyOf(substitutions);
     }
@@ -38,7 +42,7 @@ public final class LaunchArguments {
                 throw new IllegalArgumentException(
                         "Conditional argument requires rules and value: " + conditional);
             }
-            if (rules.isAllowed(conditional.getAsJsonArray("rules"))) {
+            if (rules.isAllowed(ruleParser.parse(conditional.getAsJsonArray("rules")))) {
                 addValue(arguments, conditional.get("value"));
             }
         }

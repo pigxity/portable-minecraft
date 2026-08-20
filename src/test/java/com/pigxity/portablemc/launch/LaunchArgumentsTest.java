@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.google.gson.JsonParser;
 import com.pigxity.portablemc.platform.OperatingSystem;
 import com.pigxity.portablemc.rule.RuleEnvironment;
+import com.pigxity.portablemc.rule.RuleParser;
 import com.pigxity.portablemc.rule.RuleResolver;
 
 import org.junit.jupiter.api.Test;
@@ -18,10 +19,12 @@ class LaunchArgumentsTest {
     void expandsStringsArraysRulesAndPlaceholdersInOrder() {
         RuleEnvironment environment =
                 new RuleEnvironment(
-                        new OperatingSystem("windows", "10.0", "amd64"),
-                        RuleEnvironment.defaultFeatures());
+                        new OperatingSystem("windows", "10.0", "amd64"), Map.of());
         LaunchArguments arguments =
-                new LaunchArguments(new RuleResolver(environment), Map.of("name", "Player"));
+                new LaunchArguments(
+                        new RuleParser(),
+                        new RuleResolver(environment),
+                        Map.of("name", "Player"));
 
         List<String> result =
                 arguments.resolve(

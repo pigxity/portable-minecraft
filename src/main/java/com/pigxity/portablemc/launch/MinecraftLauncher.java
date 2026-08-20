@@ -6,6 +6,7 @@ import com.pigxity.portablemc.Main;
 import com.pigxity.portablemc.archive.RuntimeArchive;
 import com.pigxity.portablemc.library.LibraryClasspath;
 import com.pigxity.portablemc.rule.RuleEnvironment;
+import com.pigxity.portablemc.rule.RuleParser;
 import com.pigxity.portablemc.rule.RuleResolver;
 
 import java.io.File;
@@ -30,6 +31,7 @@ public final class MinecraftLauncher {
         String mainClass = archive.readFile("main-class").trim();
 
         RuleEnvironment environment = RuleEnvironment.current();
+        RuleParser ruleParser = new RuleParser();
         RuleResolver ruleResolver = new RuleResolver(environment);
 
         Main.log("Loading libraries, OS: " + environment.operatingSystem());
@@ -37,7 +39,10 @@ public final class MinecraftLauncher {
         List<Path> classpath =
                 new ArrayList<>(
                         new LibraryClasspath(
-                                        gameDirectory, ruleResolver, environment.operatingSystem())
+                                        gameDirectory,
+                                        ruleParser,
+                                        ruleResolver,
+                                        environment.operatingSystem())
                                 .resolve(packageRules.getAsJsonArray("libraries")));
 
         String version = packageRules.get("version").getAsString();
@@ -55,7 +60,7 @@ public final class MinecraftLauncher {
         Files.createDirectories(natives);
         Map<String, String> substitutions =
                 substitutions(gameDirectory, natives, classpath, packageRules);
-        LaunchArguments arguments = new LaunchArguments(ruleResolver, substitutions);
+        LaunchArguments arguments = new LaunchArguments(ruleParser, ruleResolver, substitutions);
         JsonObject argumentDefinitions = packageRules.getAsJsonObject("arguments");
         List<String> jvmArguments = arguments.resolve(argumentDefinitions.getAsJsonArray("jvm"));
         List<String> gameArguments = mergeArgs(arguments.resolve(

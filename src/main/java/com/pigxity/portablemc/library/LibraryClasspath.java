@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.pigxity.portablemc.platform.OperatingSystem;
+import com.pigxity.portablemc.rule.RuleParser;
 import com.pigxity.portablemc.rule.RuleResolver;
 
 import java.io.IOException;
@@ -15,12 +16,17 @@ import java.util.Locale;
 
 public final class LibraryClasspath {
     private final Path gameDirectory;
+    private final RuleParser ruleParser;
     private final RuleResolver rules;
     private final OperatingSystem operatingSystem;
 
     public LibraryClasspath(
-            Path gameDirectory, RuleResolver rules, OperatingSystem operatingSystem) {
+            Path gameDirectory,
+            RuleParser ruleParser,
+            RuleResolver rules,
+            OperatingSystem operatingSystem) {
         this.gameDirectory = gameDirectory;
+        this.ruleParser = ruleParser;
         this.rules = rules;
         this.operatingSystem = operatingSystem;
     }
@@ -30,7 +36,8 @@ public final class LibraryClasspath {
         for (JsonElement element : definitions) {
             JsonObject definition = element.getAsJsonObject();
             String coordinate = definition.get("name").getAsString();
-            boolean ruleAllowed = rules.isAllowed(definition.getAsJsonArray("rules"));
+            boolean ruleAllowed =
+                    rules.isAllowed(ruleParser.parse(definition.getAsJsonArray("rules")));
             if (!ruleAllowed || !classifierMatchesArchitecture(coordinate)) {
                 continue;
             }
