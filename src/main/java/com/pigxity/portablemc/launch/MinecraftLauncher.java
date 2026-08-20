@@ -63,7 +63,7 @@ public final class MinecraftLauncher {
         LaunchArguments arguments = new LaunchArguments(ruleParser, ruleResolver, substitutions);
         JsonObject argumentDefinitions = packageRules.getAsJsonObject("arguments");
         List<String> jvmArguments = arguments.resolve(argumentDefinitions.getAsJsonArray("jvm"));
-        List<String> gameArguments = mergeArgs(arguments.resolve(
+        List<String> gameArguments = LaunchArguments.mergeArgs(arguments.resolve(
                 argumentDefinitions.getAsJsonArray("game")), Arrays.asList(minecraftArguments)
         );
 
@@ -128,25 +128,5 @@ public final class MinecraftLauncher {
             }
             throw exception;
         }
-    }
-
-    private static List<String> mergeArgs(List<String> first, List<String> second) {
-        Map<String, String> merged = new LinkedHashMap<>();
-
-        for (int i = 0; i < first.size(); i += 2) {
-            merged.put(first.get(i), first.get(i + 1));
-        }
-
-        for (int i = 0; i < second.size(); i += 2) {
-            merged.put(second.get(i), second.get(i + 1));
-        }
-
-        List<String> result = new ArrayList<>();
-        merged.forEach((key, value) -> {
-            result.add(key);
-            result.add(value);
-        });
-
-        return result;
     }
 }

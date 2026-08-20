@@ -17,31 +17,14 @@ public final class VerifiedDownloader {
     private static final int CONNECT_TIMEOUT_MILLIS = 30_000;
     private static final int READ_TIMEOUT_MILLIS = 120_000;
 
-    public Path downloadVerified(String url, Path destination, String expectedSha1)
-            throws IOException {
+    public Path downloadVerified(String url, Path destination, String expectedSha1) throws IOException {
         Objects.requireNonNull(expectedSha1, "expectedSha1");
         if (Files.isRegularFile(destination)
                 && expectedSha1.equalsIgnoreCase(Hashing.sha1(destination))) {
             return destination;
         }
         Files.deleteIfExists(destination);
-        Path temporary = download(url, destination);
-        try {
-            String actualSha1 = Hashing.sha1(temporary);
-            if (!expectedSha1.equalsIgnoreCase(actualSha1)) {
-                throw new DownloadVerificationException(
-                        "SHA-1 mismatch for "
-                                + url
-                                + ": expected "
-                                + expectedSha1
-                                + " but received "
-                                + actualSha1);
-            }
-            moveIntoPlace(temporary, destination);
-            return destination;
-        } finally {
-            Files.deleteIfExists(temporary);
-        }
+        return download(url, destination, expectedSha1);
     }
 
     public Path downloadWithTtl(String url, Path destination, Duration ttl) throws IOException {
@@ -52,8 +35,15 @@ public final class VerifiedDownloader {
                         .isAfter(Instant.now())) {
             return destination;
         }
-        Path temporary = download(url, destination);
+        return download(url, destination, null);
+    }
+
+    private Path download(String url, Path destination, String expectedSha1) throws IOException {
+        Path temporary = downloadTemporary(url, destination);
         try {
+            if (expectedSha1 != null) {
+                verifySha1(url, temporary, expectedSha1);
+            }
             moveIntoPlace(temporary, destination);
             return destination;
         } finally {
@@ -61,7 +51,7 @@ public final class VerifiedDownloader {
         }
     }
 
-    private Path download(String url, Path destination) throws IOException {
+    private Path downloadTemporary(String url, Path destination) throws IOException {
         Files.createDirectories(destination.getParent());
         Path temporary =
                 destination.resolveSibling(
@@ -84,6 +74,19 @@ public final class VerifiedDownloader {
             throw exception;
         } finally {
             connection.disconnect();
+        }
+    }
+
+    private static void verifySha1(String url, Path file, String expectedSha1) throws IOException {
+        String actualSha1 = Hashing.sha1(file);
+        if (!expectedSha1.equalsIgnoreCase(actualSha1)) {
+            throw new DownloadVerificationException(
+                    "SHA-1 mismatch for "
+                            + url
+                            + ": expected "
+                            + expectedSha1
+                            + " but received "
+                            + actualSha1);
         }
     }
 
