@@ -7,7 +7,6 @@ import com.pigxity.portablemc.rule.RuleParser;
 import com.pigxity.portablemc.rule.RuleResolver;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -84,25 +83,5 @@ public final class LaunchArguments {
         }
         matcher.appendTail(result);
         return result.toString();
-    }
-
-    public static List<String> mergeArgs(List<String> first, List<String> second) {
-        Map<String, String> merged = new LinkedHashMap<>();
-
-        for (int i = 0; i < first.size(); i += 2) {
-            merged.put(first.get(i), first.get(i + 1));
-        }
-
-        for (int i = 0; i < second.size(); i += 2) {
-            merged.put(second.get(i), second.get(i + 1));
-        }
-
-        List<String> result = new ArrayList<>();
-        merged.forEach((key, value) -> {
-            result.add(key);
-            result.add(value);
-        });
-
-        return result;
     }
 }

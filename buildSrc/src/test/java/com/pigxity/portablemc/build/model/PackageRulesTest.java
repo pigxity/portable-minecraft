@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 class PackageRulesTest {
     @Test
-    void rulesDocumentKeepsLaunchDataButRemovesDownloads() {
+    void rulesDocumentKeepsOnlyLaunchRulesAndRemovesMetadataAndDownloads() {
         JsonObject packageJson =
                 JsonParser.parseString(
                                 """
@@ -35,9 +35,11 @@ class PackageRulesTest {
 
         JsonObject rules = PackageRules.create(packageJson);
 
-        assertEquals("26.1", rules.get("version").getAsString());
-        assertEquals("26", rules.get("assetIndex").getAsString());
         assertTrue(rules.has("arguments"));
+        assertFalse(rules.has("version"));
+        assertFalse(rules.has("assetIndex"));
+        assertFalse(rules.has("mainClass"));
+        assertFalse(rules.has("versionType"));
         assertFalse(rules.toString().contains("downloads"));
         assertFalse(rules.toString().contains("https://"));
         assertEquals(

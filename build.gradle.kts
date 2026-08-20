@@ -37,7 +37,7 @@ tasks.test {
 }
 
 tasks.jar {
-    archiveBaseName.set("portable-minecraft")
+    archiveBaseName.set("portable-minecraft-$minecraftVersion")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest.attributes["Main-Class"] = projectMainClass
     from({
