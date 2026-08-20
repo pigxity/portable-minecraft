@@ -11,10 +11,6 @@ public final class PackageRules {
 
     public static JsonObject create(JsonObject packageJson) {
         JsonObject output = new JsonObject();
-        output.addProperty("version", packageJson.get("id").getAsString());
-        output.addProperty("versionType", packageJson.get("type").getAsString());
-        output.addProperty(
-                "assetIndex", packageJson.getAsJsonObject("assetIndex").get("id").getAsString());
         output.add("arguments", packageJson.getAsJsonObject("arguments").deepCopy());
 
         Map<String, JsonArray> rulesByCoordinate = new LinkedHashMap<>();

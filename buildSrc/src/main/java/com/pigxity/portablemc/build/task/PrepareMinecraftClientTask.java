@@ -14,6 +14,7 @@ import org.gradle.work.DisableCachingByDefault;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 @DisableCachingByDefault(because = "Inputs reside in the plugin's verified Gradle user-home cache")
 public abstract class PrepareMinecraftClientTask extends MinecraftTask {
@@ -52,10 +53,26 @@ public abstract class PrepareMinecraftClientTask extends MinecraftTask {
 
         FileTrees.copy(
                 cache().packageRules(version), output.resolve("packagerules.json"));
+
         Files.writeString(
-                output.resolve("main-class"),
-                packageJson.get("mainClass").getAsString(),
+                output.resolve("clientmeta.propeties"),
+                generatePropertiesList(Map.of(
+                        "mainClass", packageJson.get("mainClass").getAsString(),
+                        "version", packageJson.get("id").getAsString(),
+                        "versionType", packageJson.get("type").getAsString(),
+                        "assetIndex", packageJson.getAsJsonObject("assetIndex").get("id").getAsString()
+
+                )),
                 StandardCharsets.UTF_8);
         getLogger().lifecycle("Prepared Minecraft {} runtime resources in {}", version, output);
+    }
+
+    private String generatePropertiesList(Map<String, String> values) {
+        final StringBuilder builder = new StringBuilder();
+
+        values.forEach((String key, String value) ->
+                builder.append(key).append("=").append(value).append("\n"));
+
+        return builder.toString();
     }
 }
