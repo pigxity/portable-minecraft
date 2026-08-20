@@ -18,20 +18,38 @@ For development, you could use the `runClient` task to run the project.
 ./gradlew runClient
 ```
 
-## Usage
+## Simple Usage
 
 Simply run the versioned jar with Java >= 25.
 ```bash
 java -jar portable-minecraft-26.2-1.0-SNAPSHOT.jar
 ```
 
-Launcher feature flags use two dashes, JVM arguments use the `-J` prefix, and Minecraft
-argument substitutions use `-name=value`. Arguments after a literal `--` are passed directly
-to Minecraft without launcher validation.
+## CLI Arguments
+
+Note that it is recommended to use feature flags and argument substitutions over directly passing arguments. 
+This is what Minecraft's official launcher does internally.
+
+- Feature flags (`--value`): these are used for package rule evaluation and conditionally enable specific Minecraft arguments.
+- Argument substitutions (`-key=value`): These replace placeholders in launcher arguments. Some require certain feature flags to work.
+
+Use the generated `packagerules.json` file for reference. It is a stripped version of Mojang's version package and contains all rule/feature/argument definitions.
+
+### Other arguments
+
+- Minecraft JVM arguments are prefixed with `-J`.
+- Arguments after a literal `--` are passed directly to Minecraft (not recommended)
+
+Full example:
 
 ```bash
-java -jar portable-minecraft-26.2-1.0-SNAPSHOT.jar --is_demo_user -J-Xmx8G -auth_player_name=Player1 -- --uuid xxxxx
+java -jar portable-minecraft-26.2-1.0-SNAPSHOT.jar --is_demo_user -J-Xmx8G -auth_player_name=Player1 -- --accessToken xxxxx
 ```
 
-Note that Microsoft authentication is not yet supported, so you cannot join `online-mode=true` servers. 
-You may, however, pass in `uuid` and `accessToken` manually but generating it requires extra setup.
+### Authentication
+To join online servers, you must pass in the following substitutions for authentication:
+- `-auth_player_name=...`: your account's username
+- `-auth_uuid=...`: your account's public UUID
+- `-auth_access_token=...`: your **private** token generated through Microsoft's OAUTH/MinecraftServices flow.
+
+You must generate the latter two through an external tool.
