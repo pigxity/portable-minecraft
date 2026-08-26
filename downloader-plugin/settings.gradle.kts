@@ -1,4 +1,4 @@
-rootProject.name = "portable-minecraft-build"
+rootProject.name = "downloader-plugin"
 
 include(":shared")
 project(":shared").projectDir = file("../shared")

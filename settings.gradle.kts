@@ -1,3 +1,7 @@
+pluginManagement {
+    includeBuild("downloader-plugin")
+}
+
 rootProject.name = "portable-minecraft"
 
-include("shared")
+include("launcher", "shared")
