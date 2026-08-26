@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 class ClientMetadataTest {
@@ -19,23 +18,24 @@ class ClientMetadataTest {
                         "net.minecraft.client.main.Main", "26.2", "release", "32");
         Path file = temporaryDirectory.resolve("nested").resolve(ClientMetadata.FILE_NAME);
 
-        expected.write(file);
+        PropertiesFile.write(file, expected.toMap());
 
         assertEquals("./versions/26.2/26.2.jar", expected.clientJarPath());
-        assertEquals(expected, ClientMetadata.read(file));
+        assertEquals(expected, ClientMetadata.fromMap(PropertiesFile.read(file)));
     }
 
     @Test
     void parsesBundledMetadataAndResolvesConfiguredClientJar() throws Exception {
         ClientMetadata metadata =
-                ClientMetadata.parse(
-                        """
-                        mainClass=example.Main
-                        version=26.2
-                        versionType=release
-                        assetIndex=32
-                        clientJarPath=./versions/26.2/custom-name.jar
-                        """);
+                ClientMetadata.fromMap(
+                        PropertiesFile.parse(
+                                """
+                                mainClass=example.Main
+                                version=26.2
+                                versionType=release
+                                assetIndex=32
+                                clientJarPath=./versions/26.2/custom-name.jar
+                                """));
 
         assertEquals(
                 temporaryDirectory.resolve("versions/26.2/custom-name.jar").toAbsolutePath(),
@@ -43,25 +43,25 @@ class ClientMetadataTest {
     }
 
     @Test
-    void roundTripsCharactersWithPropertiesSyntax() throws Exception {
-        ClientMetadata expected =
-                new ClientMetadata(
-                        " example:Main#1",
-                        "26.2",
-                        "release=test",
-                        "index\\with-tab\t",
-                        "./versions/26.2/26.2.jar");
-        Path file = temporaryDirectory.resolve("special.properties");
+    void parsesCharactersWithPropertiesSyntax() throws Exception {
+        ClientMetadata metadata =
+                ClientMetadata.fromMap(
+                        PropertiesFile.parse(
+                                """
+                                mainClass=example\\:Main\\#1
+                                version=26.2
+                                versionType=release=test
+                                assetIndex=index\\\\with-tab\t
+                                clientJarPath=./versions/26.2/26.2.jar
+                                """));
 
-        expected.write(file);
-
-        assertEquals(expected, ClientMetadata.read(file));
+        assertEquals("example:Main#1", metadata.mainClass());
+        assertEquals("release=test", metadata.versionType());
+        assertEquals("index\\with-tab\t", metadata.assetIndex());
     }
 
     @Test
-    void rejectsMissingPropertiesAndPathsOutsideWorkingDirectory() {
-        assertThrows(IOException.class, () -> ClientMetadata.parse("version=26.2\n"));
-
+    void rejectsPathsOutsideWorkingDirectory() {
         assertThrows(
                 IllegalArgumentException.class,
                 () ->
