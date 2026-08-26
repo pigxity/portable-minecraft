@@ -14,9 +14,11 @@ public final class DownloadBatch {
 
     public static <T> void run(Collection<T> items, ThrowingConsumer<T> action) throws IOException {
         int workerCount = Math.clamp(Runtime.getRuntime().availableProcessors(), 1, 16);
+
         try (ExecutorService executor = Executors.newFixedThreadPool(workerCount)) {
             try {
                 List<Future<?>> futures = new ArrayList<>(items.size());
+
                 for (T item : items) {
                     futures.add(
                             executor.submit(
@@ -25,6 +27,7 @@ public final class DownloadBatch {
                                         return null;
                                     }));
                 }
+
                 for (Future<?> future : futures) {
                     try {
                         future.get();
@@ -33,9 +36,11 @@ public final class DownloadBatch {
                         throw new IOException("Download interrupted", exception);
                     } catch (ExecutionException exception) {
                         Throwable cause = exception.getCause();
+
                         if (cause instanceof IOException ioException) {
                             throw ioException;
                         }
+
                         throw new IOException("Download failed", cause);
                     }
                 }

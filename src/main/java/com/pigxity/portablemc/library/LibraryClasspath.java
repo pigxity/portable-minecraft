@@ -32,9 +32,11 @@ public final class LibraryClasspath {
 
     public List<Path> resolve(JsonArray definitions) throws IOException {
         List<Path> libraries = new ArrayList<>();
+
         for (JsonElement element : definitions) {
             JsonObject definition = element.getAsJsonObject();
             String coordinate = definition.get("name").getAsString();
+
             boolean ruleAllowed =
                     rules.isAllowed(ruleParser.parse(definition.getAsJsonArray("rules")));
             if (!ruleAllowed
@@ -42,15 +44,19 @@ public final class LibraryClasspath {
                             .supports(operatingSystem.architecture())) {
                 continue;
             }
+
             Path library =
                     gameDirectory
                             .resolve("libraries")
                             .resolve(MavenCoordinates.libraryPath(coordinate));
+
             if (!Files.isRegularFile(library)) {
                 throw new IOException("Required library is missing: " + library);
             }
+
             libraries.add(library.toAbsolutePath().normalize());
         }
+
         return List.copyOf(libraries);
     }
 }

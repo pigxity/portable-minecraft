@@ -29,6 +29,7 @@ class RuleResolverTest {
     @Test
     void resolvesOrderedAllowAndDisallowRules() {
         RuleResolver resolver = new RuleResolver(windows);
+
         assertTrue(resolver.isAllowed(parse("[]")));
         assertTrue(
                 resolver.isAllowed(

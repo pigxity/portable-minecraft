@@ -22,6 +22,7 @@ public enum LibraryClassifier {
 
     public static LibraryClassifier fromCoordinate(String coordinate) {
         String classifier = MavenCoordinates.classifier(coordinate).toLowerCase(Locale.ROOT);
+
         return Arrays.stream(values())
                 .filter(candidate -> candidate.pattern.matcher(classifier).matches())
                 .findFirst()

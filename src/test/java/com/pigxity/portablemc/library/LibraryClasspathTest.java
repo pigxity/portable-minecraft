@@ -33,6 +33,7 @@ class LibraryClasspathTest {
             Files.createDirectories(path.getParent());
             Files.createFile(path);
         }
+
         RuleEnvironment environment =
                 new RuleEnvironment(new OperatingSystem("windows", "10.0", "amd64"), Map.of());
         LibraryClasspath classpath =
@@ -67,6 +68,7 @@ class LibraryClasspathTest {
                         new RuleParser(),
                         new RuleResolver(environment),
                         environment.operatingSystem());
+
         assertThrows(
                 UnsupportedRuleException.class,
                 () ->

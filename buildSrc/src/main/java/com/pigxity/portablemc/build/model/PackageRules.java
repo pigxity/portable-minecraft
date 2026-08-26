@@ -26,7 +26,9 @@ public final class PackageRules {
             library.add("rules", entry.getValue());
             libraries.add(library);
         }
+
         output.add("libraries", libraries);
+
         return output;
     }
 }

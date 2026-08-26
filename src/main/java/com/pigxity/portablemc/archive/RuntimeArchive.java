@@ -12,8 +12,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public final class RuntimeArchive {
-    private static final List<String> RUNTIME_PREFIXES =
-            List.of("libraries/", "assets/", "versions/");
+    private static final List<String> RUNTIME_PREFIXES = List.of("libraries/", "assets/", "versions/");
     private final Path archive;
 
     public RuntimeArchive(Path archive) {
@@ -29,10 +28,12 @@ public final class RuntimeArchive {
                                     .getCodeSource()
                                     .getLocation()
                                     .toURI());
+
             if (!Files.isRegularFile(location)) {
                 throw new IOException(
                         "The runtime loader must be launched from its bundled JAR: " + location);
             }
+
             return new RuntimeArchive(location);
         } catch (URISyntaxException exception) {
             throw new IOException("Could not locate the bundled JAR", exception);
@@ -41,21 +42,29 @@ public final class RuntimeArchive {
 
     public void extractRuntimeTrees(Path destination) throws IOException {
         Path root = destination.toAbsolutePath().normalize();
+
         Files.createDirectories(root);
+
         try (JarFile jar = new JarFile(archive.toFile())) {
             var entries = jar.entries();
+
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
+
                 if (entry.isDirectory()
                         || RUNTIME_PREFIXES.stream().noneMatch(entry.getName()::startsWith)) {
                     continue;
                 }
+
                 Path output = root.resolve(entry.getName()).normalize();
+
                 if (!output.startsWith(root)) {
                     throw new IOException(
                             "Refusing to extract unsafe JAR entry: " + entry.getName());
                 }
+
                 Files.createDirectories(output.getParent());
+
                 try (InputStream input = jar.getInputStream(entry)) {
                     if (input.hashCode() != output.hashCode()) {
                         Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
@@ -68,9 +77,11 @@ public final class RuntimeArchive {
     public String readFile(String filename) throws IOException {
         try (JarFile jar = new JarFile(archive.toFile())) {
             JarEntry entry = jar.getJarEntry(filename);
+
             if (entry == null) {
                 throw new IOException("Bundled resource " + filename + " is missing");
             }
+
             try (InputStream input = jar.getInputStream(entry)) {
                 return new String(input.readAllBytes(), StandardCharsets.UTF_8);
             }

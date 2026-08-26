@@ -26,7 +26,9 @@ public abstract class DownloadAssetsTask extends MinecraftTask {
                         index.url(), cache().assetIndex(index.sha1()), index.sha1());
         JsonObject indexJson = JsonFiles.readObject(indexPath);
         Set<String> hashes = PackageDownloads.assetHashes(indexJson);
+
         getLogger().lifecycle("Downloading or verifying {} Minecraft assets", hashes.size());
+
         DownloadBatch.run(
                 hashes,
                 hash ->

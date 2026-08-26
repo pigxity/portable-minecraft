@@ -7,12 +7,10 @@ public enum RuleAction {
     DISALLOW;
 
     public static RuleAction fromString(String string) {
-        return switch (string) {
-            case "allow" -> RuleAction.ALLOW;
-            case "disallow" -> RuleAction.DISALLOW;
-            default -> throw new UnsupportedRuleException(
-                    "Unsupported rule action: " + string
-            );
-        };
+        try {
+            return RuleAction.valueOf(string.toUpperCase());
+        } catch (Exception e) {
+            throw new UnsupportedRuleException("Unsupported rule action: " + string);
+        }
     }
 }

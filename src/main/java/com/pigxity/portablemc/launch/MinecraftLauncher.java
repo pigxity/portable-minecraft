@@ -26,6 +26,7 @@ public final class MinecraftLauncher {
         Main.log("Extracting required files");
 
         archive.extractRuntimeTrees(gameDirectory);
+
         JsonObject packageRules =
                 JsonParser.parseString(archive.readFile("packagerules.json")).getAsJsonObject();
         String mainClass = archive.readFile("main-class").trim();
@@ -54,18 +55,22 @@ public final class MinecraftLauncher {
         if (!Files.isRegularFile(client)) {
             throw new IllegalStateException("Minecraft client is missing: " + client);
         }
+
         classpath.add(client.toAbsolutePath().normalize());
 
         Path natives = gameDirectory.resolve("natives");
+
         Files.createDirectories(natives);
+
         Map<String, String> substitutions =
                 substitutions(gameDirectory, natives, classpath, packageRules);
         LaunchArguments arguments = new LaunchArguments(ruleParser, ruleResolver, substitutions);
         JsonObject argumentDefinitions = packageRules.getAsJsonObject("arguments");
         List<String> jvmArguments = arguments.resolve(argumentDefinitions.getAsJsonArray("jvm"));
-        List<String> gameArguments = LaunchArguments.mergeArgs(arguments.resolve(
-                argumentDefinitions.getAsJsonArray("game")), Arrays.asList(minecraftArguments)
-        );
+        List<String> gameArguments =
+                LaunchArguments.mergeArgs(
+                        arguments.resolve(argumentDefinitions.getAsJsonArray("game")),
+                        Arrays.asList(minecraftArguments));
 
         Main.log("JVM arguments: " + jvmArguments);
         Main.log("Minecraft arguments: " + gameArguments);
@@ -85,6 +90,7 @@ public final class MinecraftLauncher {
     private static Map<String, String> substitutions(
             Path gameDirectory, Path natives, List<Path> classpath, JsonObject rules) {
         Map<String, String> values = new LinkedHashMap<>();
+        
         values.put("auth_player_name", "Player");
         values.put("version_name", rules.get("version").getAsString());
         values.put("game_directory", gameDirectory.toString());
@@ -101,6 +107,7 @@ public final class MinecraftLauncher {
         values.put(
                 "classpath",
                 String.join(File.pathSeparator, classpath.stream().map(Path::toString).toList()));
+
         return values;
     }
 
@@ -116,16 +123,20 @@ public final class MinecraftLauncher {
             URLClassLoader classLoader, String mainClass, List<String> arguments) throws Exception {
         Class<?> entrypoint = Class.forName(mainClass, true, classLoader);
         Method main = entrypoint.getMethod("main", String[].class);
+
         try {
             main.invoke(null, (Object) arguments.toArray(String[]::new));
         } catch (InvocationTargetException exception) {
             Throwable cause = exception.getCause();
+
             if (cause instanceof Exception checked) {
                 throw checked;
             }
+
             if (cause instanceof Error error) {
                 throw error;
             }
+
             throw exception;
         }
     }

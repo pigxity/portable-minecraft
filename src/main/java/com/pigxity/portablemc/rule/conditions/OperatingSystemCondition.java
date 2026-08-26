@@ -9,8 +9,8 @@ import java.util.regex.Pattern;
 
 import static com.pigxity.portablemc.rule.RuleUtils.pattern;
 
-public record OperatingSystemCondition(String name, Pattern version, Pattern architecture) implements RuleCondition {
-
+public record OperatingSystemCondition(String name, Pattern version, Pattern architecture)
+        implements RuleCondition {
     @Override
     public boolean matches(RuleEnvironment environment) {
         OperatingSystem actual = environment.operatingSystem();
@@ -21,23 +21,15 @@ public record OperatingSystemCondition(String name, Pattern version, Pattern arc
     }
 
     public static OperatingSystemCondition parse(JsonObject object) {
-        String name = object.has("name")
-                ? object.get("name").getAsString()
-                : null;
+        String name = object.has("name") ? object.get("name").getAsString() : null;
 
-        Pattern version = object.has("version")
-                ? pattern(object.get("version").getAsString())
-                : null;
+        Pattern version =
+                object.has("version") ? pattern(object.get("version").getAsString()) : null;
 
-        Pattern architecture = object.has("arch")
-                ? pattern(object.get("arch").getAsString())
-                : null;
+        Pattern architecture =
+                object.has("arch") ? pattern(object.get("arch").getAsString()) : null;
 
-        return new OperatingSystemCondition(
-                name,
-                version,
-                architecture
-        );
+        return new OperatingSystemCondition(name, version, architecture);
     }
 
     private static boolean matches(String expected, String actual) {

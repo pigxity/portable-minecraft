@@ -25,6 +25,7 @@ public final class JsonFiles {
 
     public static void write(Path path, JsonObject object) throws IOException {
         Files.createDirectories(path.getParent());
+
         try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
             PRETTY_GSON.toJson(object, writer);
         }

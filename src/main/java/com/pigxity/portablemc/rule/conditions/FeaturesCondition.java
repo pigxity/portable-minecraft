@@ -12,10 +12,7 @@ public record FeaturesCondition(Map<String, Boolean> required) implements RuleCo
         final Map<String, Boolean> features = new HashMap<>();
 
         for (var entry : object.entrySet()) {
-            features.put(
-                    entry.getKey(),
-                    entry.getValue().getAsBoolean()
-            );
+            features.put(entry.getKey(), entry.getValue().getAsBoolean());
         }
 
         return new FeaturesCondition(features);
@@ -24,10 +21,10 @@ public record FeaturesCondition(Map<String, Boolean> required) implements RuleCo
     @Override
     public boolean matches(RuleEnvironment environment) {
         return required.entrySet().stream()
-                .allMatch(entry ->
-                        environment.features()
-                                .getOrDefault(entry.getKey(), false)
-                                .equals(entry.getValue())
-                );
+                .allMatch(
+                        entry ->
+                                environment.features()
+                                        .getOrDefault(entry.getKey(), false)
+                                        .equals(entry.getValue()));
     }
 }

@@ -29,24 +29,29 @@ public final class LaunchArguments {
 
     public List<String> resolve(JsonArray definitions) {
         List<String> arguments = new ArrayList<>();
+
         for (JsonElement definition : definitions) {
             if (definition.isJsonPrimitive() && definition.getAsJsonPrimitive().isString()) {
                 arguments.add(substitute(definition.getAsString()));
                 continue;
             }
+
             if (!definition.isJsonObject()) {
                 throw new IllegalArgumentException(
                         "Unsupported argument definition: " + definition);
             }
+
             JsonObject conditional = definition.getAsJsonObject();
             if (!conditional.has("rules") || !conditional.has("value")) {
                 throw new IllegalArgumentException(
                         "Conditional argument requires rules and value: " + conditional);
             }
+
             if (rules.isAllowed(ruleParser.parse(conditional.getAsJsonArray("rules")))) {
                 addValue(arguments, conditional.get("value"));
             }
         }
+
         return List.copyOf(arguments);
     }
 
@@ -55,16 +60,20 @@ public final class LaunchArguments {
             destination.add(substitute(value.getAsString()));
             return;
         }
+
         if (value.isJsonArray()) {
             for (JsonElement item : value.getAsJsonArray()) {
                 if (!item.isJsonPrimitive() || !item.getAsJsonPrimitive().isString()) {
                     throw new IllegalArgumentException(
                             "Argument array values must be strings: " + item);
                 }
+
                 destination.add(substitute(item.getAsString()));
             }
+
             return;
         }
+
         throw new IllegalArgumentException(
                 "Argument value must be a string or string array: " + value);
     }
@@ -72,6 +81,7 @@ public final class LaunchArguments {
     private String substitute(String value) {
         Matcher matcher = PLACEHOLDER.matcher(value);
         StringBuilder result = new StringBuilder();
+
         while (matcher.find()) {
             String replacement = substitutions.get(matcher.group(1));
             if (replacement == null) {
@@ -80,9 +90,12 @@ public final class LaunchArguments {
                                 + matcher.group(1)
                                 + "}");
             }
+
             matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
         }
+
         matcher.appendTail(result);
+
         return result.toString();
     }
 

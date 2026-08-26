@@ -21,12 +21,15 @@ public record MinecraftPackage(
         VerifiedDownloader downloader = new VerifiedDownloader();
         downloader.downloadWithTtl(
                 MANIFEST_URL, cache.manifest(), java.time.Duration.ofHours(manifestTtlHours));
+
         JsonObject manifest = JsonFiles.readObject(cache.manifest());
         JsonObject metadata = findVersion(manifest.getAsJsonArray("versions"), version);
         String sha1 = metadata.get("sha1").getAsString();
         String url = metadata.get("url").getAsString();
         Path packagePath = cache.versionPackage(sha1);
+
         downloader.downloadVerified(url, packagePath, sha1);
+
         return new MinecraftPackage(
                 version, sha1, url, packagePath, JsonFiles.readObject(packagePath));
     }
@@ -36,17 +39,20 @@ public record MinecraftPackage(
             throw new IOException(
                     "Minecraft manifest has not been downloaded; run downloadPackage first");
         }
+
         JsonObject metadata =
                 findVersion(
                         JsonFiles.readObject(cache.manifest()).getAsJsonArray("versions"), version);
         String sha1 = metadata.get("sha1").getAsString();
         Path packagePath = cache.versionPackage(sha1);
+
         if (!Files.isRegularFile(packagePath)) {
             throw new IOException(
                     "Minecraft package "
                             + version
                             + " has not been downloaded; run downloadPackage first");
         }
+
         return new MinecraftPackage(
                 version,
                 sha1,
@@ -63,6 +69,7 @@ public record MinecraftPackage(
                 return version;
             }
         }
+
         throw new IOException(
                 "Minecraft version "
                         + requestedVersion

@@ -14,11 +14,12 @@ import java.util.Map;
 import java.util.function.Function;
 
 public final class RuleParser {
-
-    public static final Map<String, Function<JsonObject, RuleCondition>> PREDICATES = Map.of(
-        "os", (object) -> OperatingSystemCondition.parse(object.getAsJsonObject("os")),
-        "features", (object) -> FeaturesCondition.parse(object.getAsJsonObject("features")) 
-    );
+    public static final Map<String, Function<JsonObject, RuleCondition>> PREDICATES =
+            Map.of(
+                    "os",
+                    (object) -> OperatingSystemCondition.parse(object.getAsJsonObject("os")),
+                    "features",
+                    (object) -> FeaturesCondition.parse(object.getAsJsonObject("features")));
 
     public List<Rule> parse(JsonArray array) {
         return array.asList().stream()
@@ -30,10 +31,11 @@ public final class RuleParser {
     private Rule parseRule(JsonObject object) {
         RuleAction action = RuleAction.fromString(object.get("action").getAsString());
 
-        final List<RuleCondition> conditions = PREDICATES.entrySet().stream()
-                .filter(entry -> object.has(entry.getKey()))
-                .map(entry -> entry.getValue().apply(object))
-                .toList();
+        final List<RuleCondition> conditions =
+                PREDICATES.entrySet().stream()
+                        .filter(entry -> object.has(entry.getKey()))
+                        .map(entry -> entry.getValue().apply(object))
+                        .toList();
 
         return new Rule(action, conditions);
     }

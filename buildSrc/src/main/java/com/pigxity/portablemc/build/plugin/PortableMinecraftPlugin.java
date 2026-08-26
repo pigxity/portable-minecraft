@@ -31,6 +31,7 @@ public final class PortableMinecraftPlugin implements Plugin<Project> {
 
         File cacheRoot =
                 new File(project.getGradle().getGradleUserHomeDir(), "caches/portable-minecraft");
+
         TaskProvider<DownloadPackageTask> downloadPackage =
                 register(
                         project,
@@ -39,6 +40,7 @@ public final class PortableMinecraftPlugin implements Plugin<Project> {
                         "Downloads the Minecraft manifest and version package",
                         extension,
                         cacheRoot);
+
         downloadPackage.configure(
                 task -> task.getManifestTtlHours().convention(extension.getManifestTtlHours()));
 
@@ -50,6 +52,7 @@ public final class PortableMinecraftPlugin implements Plugin<Project> {
                         "Downloads and verifies the Minecraft client",
                         extension,
                         cacheRoot);
+
         downloadClient.configure(task -> task.dependsOn(downloadPackage));
 
         TaskProvider<DownloadAssetsTask> downloadAssets =
@@ -60,6 +63,7 @@ public final class PortableMinecraftPlugin implements Plugin<Project> {
                         "Downloads and verifies all Minecraft assets",
                         extension,
                         cacheRoot);
+
         downloadAssets.configure(task -> task.dependsOn(downloadPackage));
 
         TaskProvider<DownloadLibrariesTask> downloadLibraries =
@@ -70,6 +74,7 @@ public final class PortableMinecraftPlugin implements Plugin<Project> {
                         "Downloads and verifies all Minecraft libraries and native classifiers",
                         extension,
                         cacheRoot);
+
         downloadLibraries.configure(task -> task.dependsOn(downloadPackage));
 
         TaskProvider<PrepareMinecraftClientTask> prepare =
@@ -80,6 +85,7 @@ public final class PortableMinecraftPlugin implements Plugin<Project> {
                         "Prepares the embedded Minecraft runtime resources",
                         extension,
                         cacheRoot);
+
         prepare.configure(
                 task -> {
                     task.dependsOn(downloadClient, downloadAssets, downloadLibraries);
@@ -93,10 +99,12 @@ public final class PortableMinecraftPlugin implements Plugin<Project> {
                         ignored -> {
                             SourceSetContainer sourceSets =
                                     project.getExtensions().getByType(SourceSetContainer.class);
+
                             sourceSets
                                     .getByName("main")
                                     .getResources()
                                     .srcDir(extension.getGeneratedResourcesDirectory());
+
                             project.getTasks()
                                     .named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
                                     .configure(task -> task.dependsOn(prepare));

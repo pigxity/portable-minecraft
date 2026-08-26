@@ -19,11 +19,14 @@ public final class VerifiedDownloader {
 
     public Path downloadVerified(String url, Path destination, String expectedSha1) throws IOException {
         Objects.requireNonNull(expectedSha1, "expectedSha1");
+
         if (Files.isRegularFile(destination)
                 && expectedSha1.equalsIgnoreCase(Hashing.sha1(destination))) {
             return destination;
         }
+
         Files.deleteIfExists(destination);
+
         return download(url, destination, expectedSha1);
     }
 
@@ -35,16 +38,20 @@ public final class VerifiedDownloader {
                         .isAfter(Instant.now())) {
             return destination;
         }
+
         return download(url, destination, null);
     }
 
     private Path download(String url, Path destination, String expectedSha1) throws IOException {
         Path temporary = downloadTemporary(url, destination);
+
         try {
             if (expectedSha1 != null) {
                 verifySha1(url, temporary, expectedSha1);
             }
+
             moveIntoPlace(temporary, destination);
+
             return destination;
         } finally {
             Files.deleteIfExists(temporary);
@@ -57,17 +64,21 @@ public final class VerifiedDownloader {
                 destination.resolveSibling(
                         destination.getFileName() + ".part-" + UUID.randomUUID());
         HttpURLConnection connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
+
         connection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
         connection.setReadTimeout(READ_TIMEOUT_MILLIS);
         connection.setRequestProperty("User-Agent", "portable-minecraft-gradle-plugin/1");
         try {
             int responseCode = connection.getResponseCode();
+
             if (responseCode < 200 || responseCode >= 300) {
                 throw new IOException("Download failed with HTTP " + responseCode + " for " + url);
             }
+
             try (InputStream input = connection.getInputStream()) {
                 Files.copy(input, temporary, StandardCopyOption.REPLACE_EXISTING);
             }
+
             return temporary;
         } catch (IOException exception) {
             Files.deleteIfExists(temporary);
@@ -79,6 +90,7 @@ public final class VerifiedDownloader {
 
     private static void verifySha1(String url, Path file, String expectedSha1) throws IOException {
         String actualSha1 = Hashing.sha1(file);
+
         if (!expectedSha1.equalsIgnoreCase(actualSha1)) {
             throw new DownloadVerificationException(
                     "SHA-1 mismatch for "

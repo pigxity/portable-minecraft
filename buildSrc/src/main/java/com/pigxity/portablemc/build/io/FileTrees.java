@@ -17,11 +17,13 @@ public final class FileTrees {
                 }
             }
         }
+
         Files.createDirectories(directory);
     }
 
     public static void copy(Path source, Path destination) throws IOException {
         Files.createDirectories(destination.getParent());
+
         Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
     }
 }

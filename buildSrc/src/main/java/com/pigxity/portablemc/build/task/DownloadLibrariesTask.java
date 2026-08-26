@@ -17,10 +17,12 @@ public abstract class DownloadLibrariesTask extends MinecraftTask {
         List<PackageDownloads.LibraryArtifact> libraries =
                 PackageDownloads.libraries(cachedPackage().json());
         VerifiedDownloader downloader = new VerifiedDownloader();
+
         getLogger()
                 .lifecycle(
                         "Downloading or verifying {} Minecraft library artifacts",
                         libraries.size());
+
         DownloadBatch.run(
                 libraries,
                 library ->

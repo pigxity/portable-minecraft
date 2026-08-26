@@ -26,6 +26,7 @@ public abstract class PrepareMinecraftClientTask extends MinecraftTask {
         MinecraftPackage minecraftPackage = cachedPackage();
         JsonObject packageJson = minecraftPackage.json();
         Path output = getOutputDirectory().get().getAsFile().toPath();
+
         FileTrees.resetDirectory(output);
 
         PackageDownloads.Download client = PackageDownloads.client(packageJson);
@@ -60,10 +61,13 @@ public abstract class PrepareMinecraftClientTask extends MinecraftTask {
                         "mainClass", packageJson.get("mainClass").getAsString(),
                         "version", packageJson.get("id").getAsString(),
                         "versionType", packageJson.get("type").getAsString(),
-                        "assetIndex", packageJson.getAsJsonObject("assetIndex").get("id").getAsString()
-
-                )),
+                        "assetIndex",
+                                packageJson
+                                        .getAsJsonObject("assetIndex")
+                                        .get("id")
+                                        .getAsString())),
                 StandardCharsets.UTF_8);
+
         getLogger().lifecycle("Prepared Minecraft {} runtime resources in {}", version, output);
     }
 

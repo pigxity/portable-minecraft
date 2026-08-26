@@ -20,9 +20,11 @@ public abstract class DownloadPackageTask extends MinecraftTask {
         MinecraftPackage minecraftPackage =
                 MinecraftPackage.download(
                         cache(), getMinecraftVersion().get(), getManifestTtlHours().get());
+
         JsonFiles.write(
                 cache().packageRules(minecraftPackage.version()),
                 PackageRules.create(minecraftPackage.json()));
+
         getLogger()
                 .lifecycle(
                         "Cached Minecraft {} package as {}",

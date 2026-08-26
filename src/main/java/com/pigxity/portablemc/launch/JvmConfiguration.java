@@ -10,7 +10,9 @@ final class JvmConfiguration {
             if (!argument.startsWith("-D")) {
                 continue;
             }
+
             int separator = argument.indexOf('=', 2);
+
             if (separator < 0) {
                 System.setProperty(argument.substring(2), "");
             } else {

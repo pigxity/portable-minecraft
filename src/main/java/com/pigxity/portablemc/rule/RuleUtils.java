@@ -8,9 +8,7 @@ public final class RuleUtils {
         try {
             return Pattern.compile(regex);
         } catch (PatternSyntaxException exception) {
-            throw new UnsupportedRuleException(
-                    "Invalid rule regex: " + regex
-            );
+            throw new UnsupportedRuleException("Invalid rule regex: " + regex);
         }
     }
 }

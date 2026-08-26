@@ -16,9 +16,11 @@ final class Hashing {
             MessageDigest digest = sha1Digest();
             byte[] buffer = new byte[64 * 1024];
             int count;
+
             while ((count = input.read(buffer)) >= 0) {
                 digest.update(buffer, 0, count);
             }
+
             return HexFormat.of().formatHex(digest.digest());
         }
     }

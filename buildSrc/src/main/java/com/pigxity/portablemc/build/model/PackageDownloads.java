@@ -26,20 +26,24 @@ public final class PackageDownloads {
 
     public static List<LibraryArtifact> libraries(JsonObject packageJson) {
         List<LibraryArtifact> result = new ArrayList<>();
+
         for (JsonElement element : packageJson.getAsJsonArray("libraries")) {
             JsonObject library = element.getAsJsonObject();
             String coordinate = library.get("name").getAsString();
             JsonArray rules =
                     library.has("rules") ? library.getAsJsonArray("rules") : new JsonArray();
             JsonObject downloads = library.getAsJsonObject("downloads");
+
             if (downloads == null) {
                 continue;
             }
+
             if (downloads.has("artifact")) {
                 result.add(
                         libraryArtifact(
                                 coordinate, rules, downloads.getAsJsonObject("artifact")));
             }
+
             if (downloads.has("classifiers")) {
                 for (Map.Entry<String, JsonElement> classifier :
                         downloads.getAsJsonObject("classifiers").entrySet()) {
@@ -51,22 +55,27 @@ public final class PackageDownloads {
                 }
             }
         }
+
         return List.copyOf(result);
     }
 
     public static Set<String> assetHashes(JsonObject assetIndex) {
         Set<String> hashes = new LinkedHashSet<>();
+
         for (JsonElement element : assetIndex.getAsJsonObject("objects").asMap().values()) {
             hashes.add(element.getAsJsonObject().get("hash").getAsString());
         }
+
         return hashes;
     }
 
     static String withClassifier(String coordinate, String classifier) {
         String[] parts = coordinate.split(":");
+
         if (parts.length < 3) {
             throw new IllegalArgumentException("Unsupported Maven coordinate: " + coordinate);
         }
+
         return parts[0] + ":" + parts[1] + ":" + parts[2] + ":" + classifier;
     }
 
@@ -81,6 +90,7 @@ public final class PackageDownloads {
     private static LibraryArtifact libraryArtifact(
             String name, JsonArray rules, JsonObject json) {
         Download download = fromJson(name, json);
+
         return new LibraryArtifact(
                 download.name(),
                 download.path(),
