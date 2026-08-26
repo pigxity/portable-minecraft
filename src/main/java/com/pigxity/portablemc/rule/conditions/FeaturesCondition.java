@@ -1,14 +1,24 @@
 package com.pigxity.portablemc.rule.conditions;
 
+import com.google.gson.JsonObject;
 import com.pigxity.portablemc.rule.RuleEnvironment;
 import com.pigxity.portablemc.rule.model.RuleCondition;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public record FeaturesCondition(Map<String, Boolean> required) implements RuleCondition {
+    public static FeaturesCondition parse(JsonObject object) {
+        final Map<String, Boolean> features = new HashMap<>();
 
-    public FeaturesCondition {
-        required = Map.copyOf(required);
+        for (var entry : object.entrySet()) {
+            features.put(
+                    entry.getKey(),
+                    entry.getValue().getAsBoolean()
+            );
+        }
+
+        return new FeaturesCondition(features);
     }
 
     @Override
