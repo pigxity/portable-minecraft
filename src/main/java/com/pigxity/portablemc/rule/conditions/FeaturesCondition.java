@@ -23,7 +23,8 @@ public record FeaturesCondition(Map<String, Boolean> required) implements RuleCo
         return required.entrySet().stream()
                 .allMatch(
                         entry ->
-                                environment.features()
+                                environment
+                                        .features()
                                         .getOrDefault(entry.getKey(), false)
                                         .equals(entry.getValue()));
     }

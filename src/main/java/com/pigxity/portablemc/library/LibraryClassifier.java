@@ -30,7 +30,6 @@ public enum LibraryClassifier {
     }
 
     public boolean supports(String architecture) {
-        return this == UNIVERSAL
-                || architectures.contains(architecture.toLowerCase(Locale.ROOT));
+        return this == UNIVERSAL || architectures.contains(architecture.toLowerCase(Locale.ROOT));
     }
 }

@@ -40,8 +40,7 @@ public final class PackageDownloads {
 
             if (downloads.has("artifact")) {
                 result.add(
-                        libraryArtifact(
-                                coordinate, rules, downloads.getAsJsonObject("artifact")));
+                        libraryArtifact(coordinate, rules, downloads.getAsJsonObject("artifact")));
             }
 
             if (downloads.has("classifiers")) {
@@ -87,8 +86,7 @@ public final class PackageDownloads {
                 json.get("sha1").getAsString());
     }
 
-    private static LibraryArtifact libraryArtifact(
-            String name, JsonArray rules, JsonObject json) {
+    private static LibraryArtifact libraryArtifact(String name, JsonArray rules, JsonObject json) {
         Download download = fromJson(name, json);
 
         return new LibraryArtifact(

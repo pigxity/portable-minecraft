@@ -45,27 +45,26 @@ public abstract class PrepareMinecraftClientTask extends MinecraftTask {
                     output.resolve("assets/objects").resolve(hash.substring(0, 2)).resolve(hash));
         }
 
-        for (PackageDownloads.LibraryArtifact library :
-                PackageDownloads.libraries(packageJson)) {
+        for (PackageDownloads.LibraryArtifact library : PackageDownloads.libraries(packageJson)) {
             FileTrees.copy(
                     cache().library(library.path()),
                     output.resolve("libraries").resolve(library.path()));
         }
 
-        FileTrees.copy(
-                cache().packageRules(version), output.resolve("packagerules.json"));
+        FileTrees.copy(cache().packageRules(version), output.resolve("packagerules.json"));
 
         Files.writeString(
                 output.resolve("clientmeta.propeties"),
-                generatePropertiesList(Map.of(
-                        "mainClass", packageJson.get("mainClass").getAsString(),
-                        "version", packageJson.get("id").getAsString(),
-                        "versionType", packageJson.get("type").getAsString(),
-                        "assetIndex",
-                                packageJson
-                                        .getAsJsonObject("assetIndex")
-                                        .get("id")
-                                        .getAsString())),
+                generatePropertiesList(
+                        Map.of(
+                                "mainClass", packageJson.get("mainClass").getAsString(),
+                                "version", packageJson.get("id").getAsString(),
+                                "versionType", packageJson.get("type").getAsString(),
+                                "assetIndex",
+                                        packageJson
+                                                .getAsJsonObject("assetIndex")
+                                                .get("id")
+                                                .getAsString())),
                 StandardCharsets.UTF_8);
 
         getLogger().lifecycle("Prepared Minecraft {} runtime resources in {}", version, output);
@@ -74,8 +73,9 @@ public abstract class PrepareMinecraftClientTask extends MinecraftTask {
     private String generatePropertiesList(Map<String, String> values) {
         final StringBuilder builder = new StringBuilder();
 
-        values.forEach((String key, String value) ->
-                builder.append(key).append("=").append(value).append("\n"));
+        values.forEach(
+                (String key, String value) ->
+                        builder.append(key).append("=").append(value).append("\n"));
 
         return builder.toString();
     }

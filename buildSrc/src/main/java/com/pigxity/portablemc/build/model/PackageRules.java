@@ -14,8 +14,7 @@ public final class PackageRules {
         output.add("arguments", packageJson.getAsJsonObject("arguments").deepCopy());
 
         Map<String, JsonArray> rulesByCoordinate = new LinkedHashMap<>();
-        for (PackageDownloads.LibraryArtifact library :
-                PackageDownloads.libraries(packageJson)) {
+        for (PackageDownloads.LibraryArtifact library : PackageDownloads.libraries(packageJson)) {
             rulesByCoordinate.put(library.name(), library.rules().deepCopy());
         }
 

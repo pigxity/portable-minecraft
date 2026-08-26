@@ -16,10 +16,10 @@ import java.util.function.Function;
 public final class RuleParser {
     public static final Map<String, Function<JsonObject, RuleCondition>> PREDICATES =
             Map.of(
-                    "os",
-                    (object) -> OperatingSystemCondition.parse(object.getAsJsonObject("os")),
+                    "os", (object) -> OperatingSystemCondition.parse(object.getAsJsonObject("os")),
                     "features",
-                    (object) -> FeaturesCondition.parse(object.getAsJsonObject("features")));
+                            (object) ->
+                                    FeaturesCondition.parse(object.getAsJsonObject("features")));
 
     public List<Rule> parse(JsonArray array) {
         return array.asList().stream()

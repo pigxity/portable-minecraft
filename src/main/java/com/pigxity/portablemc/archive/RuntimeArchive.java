@@ -12,7 +12,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public final class RuntimeArchive {
-    private static final List<String> RUNTIME_PREFIXES = List.of("libraries/", "assets/", "versions/");
+    private static final List<String> RUNTIME_PREFIXES =
+            List.of("libraries/", "assets/", "versions/");
     private final Path archive;
 
     public RuntimeArchive(Path archive) {

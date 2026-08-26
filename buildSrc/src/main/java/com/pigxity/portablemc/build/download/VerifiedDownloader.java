@@ -17,7 +17,8 @@ public final class VerifiedDownloader {
     private static final int CONNECT_TIMEOUT_MILLIS = 30_000;
     private static final int READ_TIMEOUT_MILLIS = 120_000;
 
-    public Path downloadVerified(String url, Path destination, String expectedSha1) throws IOException {
+    public Path downloadVerified(String url, Path destination, String expectedSha1)
+            throws IOException {
         Objects.requireNonNull(expectedSha1, "expectedSha1");
 
         if (Files.isRegularFile(destination)

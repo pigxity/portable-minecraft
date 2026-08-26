@@ -1,13 +1,13 @@
 package com.pigxity.portablemc.rule.conditions;
 
+import static com.pigxity.portablemc.rule.RuleUtils.pattern;
+
 import com.google.gson.JsonObject;
 import com.pigxity.portablemc.platform.OperatingSystem;
 import com.pigxity.portablemc.rule.RuleEnvironment;
 import com.pigxity.portablemc.rule.model.RuleCondition;
 
 import java.util.regex.Pattern;
-
-import static com.pigxity.portablemc.rule.RuleUtils.pattern;
 
 public record OperatingSystemCondition(String name, Pattern version, Pattern architecture)
         implements RuleCondition {

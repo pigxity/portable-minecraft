@@ -90,7 +90,7 @@ public final class MinecraftLauncher {
     private static Map<String, String> substitutions(
             Path gameDirectory, Path natives, List<Path> classpath, JsonObject rules) {
         Map<String, String> values = new LinkedHashMap<>();
-        
+
         values.put("auth_player_name", "Player");
         values.put("version_name", rules.get("version").getAsString());
         values.put("game_directory", gameDirectory.toString());

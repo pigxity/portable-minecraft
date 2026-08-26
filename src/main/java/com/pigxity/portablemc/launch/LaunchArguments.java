@@ -111,10 +111,11 @@ public final class LaunchArguments {
         }
 
         List<String> result = new ArrayList<>();
-        merged.forEach((key, value) -> {
-            result.add(key);
-            result.add(value);
-        });
+        merged.forEach(
+                (key, value) -> {
+                    result.add(key);
+                    result.add(value);
+                });
 
         return result;
     }

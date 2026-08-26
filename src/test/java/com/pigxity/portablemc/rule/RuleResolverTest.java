@@ -54,13 +54,10 @@ class RuleResolverTest {
 
     @Test
     void rejectsUnsupportedActionsAndInvalidPatterns() {
+        assertThrows(UnsupportedRuleException.class, () -> parse("[{\"action\":\"sometimes\"}]"));
         assertThrows(
                 UnsupportedRuleException.class,
-                () -> parse("[{\"action\":\"sometimes\"}]"));
-        assertThrows(
-                UnsupportedRuleException.class,
-                () ->
-                        parse("[{\"action\":\"allow\",\"os\":{\"version\":\"[\"}}]"));
+                () -> parse("[{\"action\":\"allow\",\"os\":{\"version\":\"[\"}}]"));
     }
 
     private List<Rule> parse(String json) {
