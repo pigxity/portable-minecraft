@@ -40,4 +40,13 @@ class LaunchArgumentsTest {
                         arguments.resolve(
                                 JsonParser.parseString("[\"${missing}\"]").getAsJsonArray()));
     }
+
+    @Test
+    void mergesFlagsAndValuesWhileAllowingAdditionalArgumentsToOverrideDefaults() {
+        assertEquals(
+                List.of("--username", "Alex", "--fullscreen", "--width", "1280"),
+                LaunchArguments.mergeArgs(
+                        List.of("--username", "Player", "--fullscreen"),
+                        List.of("--username", "Alex", "--width", "1280")));
+    }
 }

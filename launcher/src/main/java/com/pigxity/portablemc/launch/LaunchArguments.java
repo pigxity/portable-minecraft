@@ -100,23 +100,30 @@ public final class LaunchArguments {
     }
 
     public static List<String> mergeArgs(List<String> first, List<String> second) {
-        Map<String, String> merged = new LinkedHashMap<>();
+        Map<String, List<String>> merged = new LinkedHashMap<>();
+        mergeOptions(merged, first);
+        mergeOptions(merged, second);
+        return merged.values().stream().flatMap(List::stream).toList();
+    }
 
-        for (int i = 0; i < first.size(); i += 2) {
-            merged.put(first.get(i), first.get(i + 1));
+    public static List<String> append(List<String> first, List<String> second) {
+        List<String> result = new ArrayList<>(first.size() + second.size());
+        result.addAll(first);
+        result.addAll(second);
+        return List.copyOf(result);
+    }
+
+    private static void mergeOptions(
+            Map<String, List<String>> destination, List<String> arguments) {
+        for (int start = 0; start < arguments.size(); ) {
+            int end = start + 1;
+            while (end < arguments.size() && !arguments.get(end).startsWith("--")) {
+                end++;
+            }
+
+            List<String> option = List.copyOf(arguments.subList(start, end));
+            destination.put(option.getFirst(), option);
+            start = end;
         }
-
-        for (int i = 0; i < second.size(); i += 2) {
-            merged.put(second.get(i), second.get(i + 1));
-        }
-
-        List<String> result = new ArrayList<>();
-        merged.forEach(
-                (key, value) -> {
-                    result.add(key);
-                    result.add(value);
-                });
-
-        return result;
     }
 }
