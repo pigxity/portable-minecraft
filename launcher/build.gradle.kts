@@ -41,7 +41,7 @@ val runtimeClasspath = configurations.runtimeClasspath
 
 tasks.jar {
     dependsOn(runtimeClasspath)
-    archiveBaseName.set("portable-minecraft")
+    archiveBaseName.set("portable-minecraft-$minecraftVersion")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest.attributes["Main-Class"] = projectMainClass
     from({
