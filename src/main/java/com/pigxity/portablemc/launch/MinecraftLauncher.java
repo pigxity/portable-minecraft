@@ -8,6 +8,8 @@ import com.pigxity.portablemc.library.LibraryClasspath;
 import com.pigxity.portablemc.rule.RuleEnvironment;
 import com.pigxity.portablemc.rule.RuleParser;
 import com.pigxity.portablemc.rule.RuleResolver;
+import com.pigxity.portablemc.shared.ClientMetadata;
+import com.pigxity.portablemc.shared.PropertiesFile;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -25,11 +27,12 @@ public final class MinecraftLauncher {
 
         Main.log("Extracting required files");
 
-        archive.extractRuntimeTrees(gameDirectory);
+        archive.extractOverrides(gameDirectory);
 
         JsonObject packageRules =
                 JsonParser.parseString(archive.readFile("packagerules.json")).getAsJsonObject();
-        String mainClass = archive.readFile("main-class").trim();
+        ClientMetadata metadata =
+                ClientMetadata.fromMap(PropertiesFile.parse(archive.readFile(ClientMetadata.FILE_NAME)));
 
         RuleEnvironment environment = RuleEnvironment.current();
         RuleParser ruleParser = new RuleParser();
@@ -46,12 +49,7 @@ public final class MinecraftLauncher {
                                         environment.operatingSystem())
                                 .resolve(packageRules.getAsJsonArray("libraries")));
 
-        String version = packageRules.get("version").getAsString();
-        Path client =
-                gameDirectory
-                        .resolve("versions")
-                        .resolve(version)
-                        .resolve("client-" + version + ".jar");
+        Path client = metadata.resolveClientJar(gameDirectory);
         if (!Files.isRegularFile(client)) {
             throw new IllegalStateException("Minecraft client is missing: " + client);
         }
@@ -63,7 +61,7 @@ public final class MinecraftLauncher {
         Files.createDirectories(natives);
 
         Map<String, String> substitutions =
-                substitutions(gameDirectory, natives, classpath, packageRules);
+                substitutions(gameDirectory, natives, classpath, metadata);
         LaunchArguments arguments = new LaunchArguments(ruleParser, ruleResolver, substitutions);
         JsonObject argumentDefinitions = packageRules.getAsJsonObject("arguments");
         List<String> jvmArguments = arguments.resolve(argumentDefinitions.getAsJsonArray("jvm"));
@@ -83,24 +81,24 @@ public final class MinecraftLauncher {
             Thread.currentThread().setContextClassLoader(classLoader);
 
             Main.log("Starting Minecraft!");
-            invokeMain(classLoader, mainClass, gameArguments);
+            invokeMain(classLoader, metadata.mainClass(), gameArguments);
         }
     }
 
     private static Map<String, String> substitutions(
-            Path gameDirectory, Path natives, List<Path> classpath, JsonObject rules) {
+            Path gameDirectory, Path natives, List<Path> classpath, ClientMetadata metadata) {
         Map<String, String> values = new LinkedHashMap<>();
 
         values.put("auth_player_name", "Player");
-        values.put("version_name", rules.get("version").getAsString());
+        values.put("version_name", metadata.version());
         values.put("game_directory", gameDirectory.toString());
         values.put("assets_root", gameDirectory.resolve("assets").toString());
-        values.put("assets_index_name", rules.get("assetIndex").getAsString());
+        values.put("assets_index_name", metadata.assetIndex());
         values.put("auth_uuid", "00000000000000000000000000000000");
         values.put("auth_access_token", "0");
         values.put("clientid", "");
         values.put("auth_xuid", "");
-        values.put("version_type", rules.get("versionType").getAsString());
+        values.put("version_type", metadata.versionType());
         values.put("natives_directory", natives.toString());
         values.put("launcher_name", "portable-minecraft");
         values.put("launcher_version", "1.0");

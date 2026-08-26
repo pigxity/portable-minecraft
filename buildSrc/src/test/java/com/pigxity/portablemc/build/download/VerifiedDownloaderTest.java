@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.sun.net.httpserver.HttpServer;
+import com.pigxity.portablemc.shared.ContentHashes;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -39,8 +40,8 @@ class VerifiedDownloaderTest {
             String url = "http://localhost:" + server.getAddress().getPort() + "/file";
             Path cached = temporaryDirectory.resolve("cache/file");
 
-            downloader.downloadVerified(url, cached, Hashing.sha1(content));
-            downloader.downloadVerified(url, cached, Hashing.sha1(content));
+            downloader.downloadVerified(url, cached, ContentHashes.sha1(content));
+            downloader.downloadVerified(url, cached, ContentHashes.sha1(content));
 
             assertArrayEquals(content, Files.readAllBytes(cached));
             assertEquals(1, requests.get());

@@ -1,5 +1,7 @@
 package com.pigxity.portablemc.archive;
 
+import com.pigxity.portablemc.shared.ContentHashes;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -7,13 +9,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public final class RuntimeArchive {
-    private static final List<String> RUNTIME_PREFIXES =
-            List.of("libraries/", "assets/", "versions/");
+    private static final String OVERRIDES_PREFIX = "overrides/";
     private final Path archive;
 
     public RuntimeArchive(Path archive) {
@@ -41,7 +41,7 @@ public final class RuntimeArchive {
         }
     }
 
-    public void extractRuntimeTrees(Path destination) throws IOException {
+    public void extractOverrides(Path destination) throws IOException {
         Path root = destination.toAbsolutePath().normalize();
 
         Files.createDirectories(root);
@@ -52,26 +52,40 @@ public final class RuntimeArchive {
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
 
-                if (entry.isDirectory()
-                        || RUNTIME_PREFIXES.stream().noneMatch(entry.getName()::startsWith)) {
+                if (entry.isDirectory() || !entry.getName().startsWith(OVERRIDES_PREFIX)) {
                     continue;
                 }
 
-                Path output = root.resolve(entry.getName()).normalize();
+                String relativeName = entry.getName().substring(OVERRIDES_PREFIX.length());
+                if (relativeName.isEmpty()) {
+                    continue;
+                }
+
+                Path output = root.resolve(relativeName).normalize();
 
                 if (!output.startsWith(root)) {
                     throw new IOException(
                             "Refusing to extract unsafe JAR entry: " + entry.getName());
                 }
 
-                Files.createDirectories(output.getParent());
-
-                try (InputStream input = jar.getInputStream(entry)) {
-                    if (input.hashCode() != output.hashCode()) {
+                if (!matches(jar, entry, output)) {
+                    Files.createDirectories(output.getParent());
+                    try (InputStream input = jar.getInputStream(entry)) {
                         Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
                     }
                 }
             }
+        }
+    }
+
+    private static boolean matches(JarFile jar, JarEntry entry, Path output) throws IOException {
+        if (!Files.isRegularFile(output) || Files.size(output) != entry.getSize()) {
+            return false;
+        }
+
+        try (InputStream bundled = jar.getInputStream(entry);
+                InputStream existing = Files.newInputStream(output)) {
+            return ContentHashes.sha256Matches(bundled, existing);
         }
     }
 

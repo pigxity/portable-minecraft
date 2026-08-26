@@ -5,16 +5,15 @@ import com.pigxity.portablemc.build.io.FileTrees;
 import com.pigxity.portablemc.build.io.JsonFiles;
 import com.pigxity.portablemc.build.model.MinecraftPackage;
 import com.pigxity.portablemc.build.model.PackageDownloads;
+import com.pigxity.portablemc.shared.ClientMetadata;
+import com.pigxity.portablemc.shared.PropertiesFile;
 
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.DisableCachingByDefault;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
 @DisableCachingByDefault(because = "Inputs reside in the plugin's verified Gradle user-home cache")
 public abstract class PrepareMinecraftClientTask extends MinecraftTask {
@@ -28,55 +27,43 @@ public abstract class PrepareMinecraftClientTask extends MinecraftTask {
         Path output = getOutputDirectory().get().getAsFile().toPath();
 
         FileTrees.resetDirectory(output);
+        Path overrides = output.resolve("overrides");
 
         PackageDownloads.Download client = PackageDownloads.client(packageJson);
-        String version = minecraftPackage.version();
+        ClientMetadata metadata =
+                ClientMetadata.create(
+                        packageJson.get("mainClass").getAsString(),
+                        packageJson.get("id").getAsString(),
+                        packageJson.get("type").getAsString(),
+                        packageJson.getAsJsonObject("assetIndex").get("id").getAsString());
+        String version = metadata.version();
         FileTrees.copy(
                 cache().client(client.sha1()),
-                output.resolve("versions").resolve(version).resolve("client-" + version + ".jar"));
+                overrides.resolve(metadata.clientJarPath()).normalize());
 
         PackageDownloads.Download index = PackageDownloads.assetIndex(packageJson);
         Path cachedIndex = cache().assetIndex(index.sha1());
         FileTrees.copy(
-                cachedIndex, output.resolve("assets/indexes").resolve(index.name() + ".json"));
+                cachedIndex,
+                overrides.resolve("assets/indexes").resolve(index.name() + ".json"));
         for (String hash : PackageDownloads.assetHashes(JsonFiles.readObject(cachedIndex))) {
             FileTrees.copy(
                     cache().assetObject(hash),
-                    output.resolve("assets/objects").resolve(hash.substring(0, 2)).resolve(hash));
+                    overrides
+                            .resolve("assets/objects")
+                            .resolve(hash.substring(0, 2))
+                            .resolve(hash));
         }
 
         for (PackageDownloads.LibraryArtifact library : PackageDownloads.libraries(packageJson)) {
             FileTrees.copy(
                     cache().library(library.path()),
-                    output.resolve("libraries").resolve(library.path()));
+                    overrides.resolve("libraries").resolve(library.path()));
         }
 
         FileTrees.copy(cache().packageRules(version), output.resolve("packagerules.json"));
-
-        Files.writeString(
-                output.resolve("clientmeta.propeties"),
-                generatePropertiesList(
-                        Map.of(
-                                "mainClass", packageJson.get("mainClass").getAsString(),
-                                "version", packageJson.get("id").getAsString(),
-                                "versionType", packageJson.get("type").getAsString(),
-                                "assetIndex",
-                                        packageJson
-                                                .getAsJsonObject("assetIndex")
-                                                .get("id")
-                                                .getAsString())),
-                StandardCharsets.UTF_8);
+        PropertiesFile.write(output.resolve(ClientMetadata.FILE_NAME), metadata.toMap());
 
         getLogger().lifecycle("Prepared Minecraft {} runtime resources in {}", version, output);
-    }
-
-    private String generatePropertiesList(Map<String, String> values) {
-        final StringBuilder builder = new StringBuilder();
-
-        values.forEach(
-                (String key, String value) ->
-                        builder.append(key).append("=").append(value).append("\n"));
-
-        return builder.toString();
     }
 }

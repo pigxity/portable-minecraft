@@ -1,5 +1,7 @@
 package com.pigxity.portablemc.build.download;
 
+import com.pigxity.portablemc.shared.ContentHashes;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -22,7 +24,7 @@ public final class VerifiedDownloader {
         Objects.requireNonNull(expectedSha1, "expectedSha1");
 
         if (Files.isRegularFile(destination)
-                && expectedSha1.equalsIgnoreCase(Hashing.sha1(destination))) {
+                && expectedSha1.equalsIgnoreCase(ContentHashes.sha1(destination))) {
             return destination;
         }
 
@@ -90,7 +92,7 @@ public final class VerifiedDownloader {
     }
 
     private static void verifySha1(String url, Path file, String expectedSha1) throws IOException {
-        String actualSha1 = Hashing.sha1(file);
+        String actualSha1 = ContentHashes.sha1(file);
 
         if (!expectedSha1.equalsIgnoreCase(actualSha1)) {
             throw new DownloadVerificationException(
