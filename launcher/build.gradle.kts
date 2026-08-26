@@ -37,12 +37,15 @@ tasks.test {
     useJUnitPlatform()
 }
 
+val runtimeClasspath = configurations.runtimeClasspath
+
 tasks.jar {
+    dependsOn(runtimeClasspath)
     archiveBaseName.set("portable-minecraft")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest.attributes["Main-Class"] = projectMainClass
     from({
-        configurations.runtimeClasspath.get().map { dependency ->
+        runtimeClasspath.get().map { dependency ->
             if (dependency.isDirectory) dependency else zipTree(dependency)
         }
     })
