@@ -3,10 +3,11 @@ package com.pigxity.portablemc.launch;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.pigxity.portablemc.Main;
-import com.pigxity.portablemc.platform.RuntimeArchive;
+import com.pigxity.portablemc.cli.LauncherArguments;
 import com.pigxity.portablemc.launch.system.JavaExecutable;
 import com.pigxity.portablemc.launch.system.LibraryClasspath;
 import com.pigxity.portablemc.launch.system.MinecraftProcess;
+import com.pigxity.portablemc.platform.RuntimeArchive;
 import com.pigxity.portablemc.rule.RuleEnvironment;
 import com.pigxity.portablemc.rule.RuleParser;
 import com.pigxity.portablemc.rule.RuleResolver;
@@ -46,11 +47,7 @@ public final class MinecraftLauncher {
         return values;
     }
 
-    public void launch(Path workingDirectory, String[] minecraftArguments) throws Exception {
-        launch(workingDirectory, LaunchOptions.withMinecraftArguments(minecraftArguments));
-    }
-
-    public void launch(Path workingDirectory, LaunchOptions additionalArguments) throws Exception {
+    public void launch(Path workingDirectory, LauncherArguments launcherArguments) throws Exception {
         Path gameDirectory = workingDirectory.toAbsolutePath().normalize();
         RuntimeArchive archive = RuntimeArchive.current();
 
@@ -63,7 +60,8 @@ public final class MinecraftLauncher {
         ClientMetadata metadata =
                 ClientMetadata.fromMap(PropertiesFile.parse(archive.readFile(ClientMetadata.FILE_NAME)));
 
-        RuleEnvironment environment = RuleEnvironment.current();
+        RuleEnvironment environment = RuleEnvironment.current(launcherArguments.features());
+
         RuleParser ruleParser = new RuleParser();
         RuleResolver ruleResolver = new RuleResolver(environment);
 
@@ -88,8 +86,9 @@ public final class MinecraftLauncher {
 
         Files.createDirectories(natives);
 
-        Map<String, String> substitutions =
-                substitutions(gameDirectory, natives, classpath, metadata);
+        Map<String, String> substitutions = substitutions(gameDirectory, natives, classpath, metadata);
+        substitutions.putAll(launcherArguments.variables());
+
         LaunchArguments arguments = new LaunchArguments(ruleParser, ruleResolver, substitutions);
         JsonObject argumentDefinitions = packageRules.getAsJsonObject("arguments");
 
@@ -97,7 +96,10 @@ public final class MinecraftLauncher {
                 new LaunchOptions(
                         arguments.resolve(argumentDefinitions.getAsJsonArray("jvm")),
                         arguments.resolve(argumentDefinitions.getAsJsonArray("game")))
-                        .merge(additionalArguments);
+                        .merge(new LaunchOptions(
+                                launcherArguments.jvmArguments(),
+                                launcherArguments.minecraftArguments())
+                        );
 
         Main.log("JVM arguments: " + launchOptions.jvmArguments());
         Main.log("Minecraft arguments: " + launchOptions.minecraftArguments());

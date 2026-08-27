@@ -2,10 +2,10 @@ package com.pigxity.portablemc.rule;
 
 import com.pigxity.portablemc.platform.OperatingSystem;
 
-import java.util.Map;
+import java.util.Set;
 
-public record RuleEnvironment(OperatingSystem operatingSystem, Map<String, Boolean> features) {
-    public static RuleEnvironment current() {
-        return new RuleEnvironment(OperatingSystem.current(), Map.of());
+public record RuleEnvironment(OperatingSystem operatingSystem, Set<String> features) {
+    public static RuleEnvironment current(Set<String> features) {
+        return new RuleEnvironment(OperatingSystem.current(), features);
     }
 }

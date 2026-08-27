@@ -44,6 +44,7 @@ tasks.jar {
     archiveBaseName.set("portable-minecraft-$minecraftVersion")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest.attributes["Main-Class"] = projectMainClass
+    manifest.attributes["Implementation-Version"] = version
     from({
         runtimeClasspath.get().map { dependency ->
             if (dependency.isDirectory) dependency else zipTree(dependency)
