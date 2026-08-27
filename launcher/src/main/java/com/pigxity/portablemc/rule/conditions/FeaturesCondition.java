@@ -25,7 +25,7 @@ public record FeaturesCondition(Map<String, Boolean> required) implements RuleCo
                         entry ->
                                 environment
                                         .features()
-                                        .getOrDefault(entry.getKey(), false)
-                                        .equals(entry.getValue()));
+                                        .contains(entry.getKey())
+                                        == entry.getValue());
     }
 }

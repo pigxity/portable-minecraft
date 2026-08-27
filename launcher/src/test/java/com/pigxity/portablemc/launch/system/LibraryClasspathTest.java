@@ -16,7 +16,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 class LibraryClasspathTest {
     @TempDir Path gameDirectory;
@@ -34,7 +34,7 @@ class LibraryClasspathTest {
         }
 
         RuleEnvironment environment =
-                new RuleEnvironment(new OperatingSystem("windows", "10.0", "amd64"), Map.of());
+                new RuleEnvironment(new OperatingSystem("windows", "10.0", "amd64"), Set.of());
         LibraryClasspath classpath =
                 new LibraryClasspath(gameDirectory, new RuleParser(), new RuleResolver(environment));
 
@@ -70,7 +70,7 @@ class LibraryClasspathTest {
     @Test
     void rejectsUnsupportedMojangRules() {
         RuleEnvironment environment =
-                new RuleEnvironment(new OperatingSystem("windows", "10.0", "amd64"), Map.of());
+                new RuleEnvironment(new OperatingSystem("windows", "10.0", "amd64"), Set.of());
         LibraryClasspath classpath =
                 new LibraryClasspath(gameDirectory, new RuleParser(), new RuleResolver(environment));
 

@@ -11,20 +11,14 @@ import com.pigxity.portablemc.rule.model.Rule;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 class RuleResolverTest {
     private final RuleParser parser = new RuleParser();
     private final RuleEnvironment windows =
             new RuleEnvironment(
                     new OperatingSystem("windows", "10.0", "amd64"),
-                    Map.of(
-                            "is_demo_user", false,
-                            "has_custom_resolution", false,
-                            "has_quick_plays_support", false,
-                            "is_quick_play_singleplayer", false,
-                            "is_quick_play_multiplayer", false,
-                            "is_quick_play_realms", false));
+                    Set.of());
 
     @Test
     void resolvesOrderedAllowAndDisallowRules() {

@@ -13,12 +13,13 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 class LaunchArgumentsTest {
     @Test
     void expandsStringsArraysRulesAndPlaceholdersInOrder() {
         RuleEnvironment environment =
-                new RuleEnvironment(new OperatingSystem("windows", "10.0", "amd64"), Map.of());
+                new RuleEnvironment(new OperatingSystem("windows", "10.0", "amd64"), Set.of());
         LaunchArguments arguments =
                 new LaunchArguments(
                         new RuleParser(), new RuleResolver(environment), Map.of("name", "Player"));
