@@ -1,11 +1,11 @@
-package com.pigxity.portablemc.launch;
+package com.pigxity.portablemc.launch.system;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-final class MinecraftProcess {
+public final class MinecraftProcess {
     private final Path workingDirectory;
     private final List<String> command;
 
@@ -14,7 +14,7 @@ final class MinecraftProcess {
         this.command = List.copyOf(command);
     }
 
-    static MinecraftProcess create(
+    public static MinecraftProcess create(
             Path javaExecutable,
             Path workingDirectory,
             List<String> jvmArguments,
@@ -30,11 +30,11 @@ final class MinecraftProcess {
         return new MinecraftProcess(workingDirectory, command);
     }
 
-    List<String> command() {
+    public List<String> command() {
         return command;
     }
 
-    Process start() throws IOException {
+    public Process start() throws IOException {
         return new ProcessBuilder(command)
                 .directory(workingDirectory.toFile())
                 .inheritIO()

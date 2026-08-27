@@ -3,8 +3,10 @@ package com.pigxity.portablemc.launch;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.pigxity.portablemc.Main;
-import com.pigxity.portablemc.archive.RuntimeArchive;
-import com.pigxity.portablemc.library.LibraryClasspath;
+import com.pigxity.portablemc.platform.RuntimeArchive;
+import com.pigxity.portablemc.launch.system.JavaExecutable;
+import com.pigxity.portablemc.launch.system.LibraryClasspath;
+import com.pigxity.portablemc.launch.system.MinecraftProcess;
 import com.pigxity.portablemc.rule.RuleEnvironment;
 import com.pigxity.portablemc.rule.RuleParser;
 import com.pigxity.portablemc.rule.RuleResolver;
@@ -72,8 +74,7 @@ public final class MinecraftLauncher {
                         new LibraryClasspath(
                                 gameDirectory,
                                 ruleParser,
-                                ruleResolver,
-                                environment.operatingSystem())
+                                ruleResolver)
                                 .resolve(packageRules.getAsJsonArray("libraries")));
 
         Path client = metadata.resolveClientJar(gameDirectory);
