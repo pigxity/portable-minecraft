@@ -72,8 +72,7 @@ public final class MinecraftLauncher {
                         new LibraryClasspath(
                                 gameDirectory,
                                 ruleParser,
-                                ruleResolver,
-                                environment.operatingSystem())
+                                ruleResolver)
                                 .resolve(packageRules.getAsJsonArray("libraries")));
 
         Path client = metadata.resolveClientJar(gameDirectory);

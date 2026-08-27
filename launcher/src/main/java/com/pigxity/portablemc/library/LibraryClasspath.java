@@ -3,7 +3,6 @@ package com.pigxity.portablemc.library;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.pigxity.portablemc.platform.OperatingSystem;
 import com.pigxity.portablemc.rule.RuleParser;
 import com.pigxity.portablemc.rule.RuleResolver;
 
@@ -17,17 +16,11 @@ public final class LibraryClasspath {
     private final Path gameDirectory;
     private final RuleParser ruleParser;
     private final RuleResolver rules;
-    private final OperatingSystem operatingSystem;
 
-    public LibraryClasspath(
-            Path gameDirectory,
-            RuleParser ruleParser,
-            RuleResolver rules,
-            OperatingSystem operatingSystem) {
+    public LibraryClasspath(Path gameDirectory, RuleParser ruleParser, RuleResolver rules) {
         this.gameDirectory = gameDirectory;
         this.ruleParser = ruleParser;
         this.rules = rules;
-        this.operatingSystem = operatingSystem;
     }
 
     public List<Path> resolve(JsonArray definitions) throws IOException {
@@ -35,20 +28,17 @@ public final class LibraryClasspath {
 
         for (JsonElement element : definitions) {
             JsonObject definition = element.getAsJsonObject();
-            String coordinate = definition.get("name").getAsString();
 
             boolean ruleAllowed =
                     rules.isAllowed(ruleParser.parse(definition.getAsJsonArray("rules")));
-            if (!ruleAllowed
-                    || !LibraryClassifier.fromCoordinate(coordinate)
-                            .supports(operatingSystem.architecture())) {
+            if (!ruleAllowed) {
                 continue;
             }
 
             Path library =
                     gameDirectory
                             .resolve("libraries")
-                            .resolve(MavenCoordinates.libraryPath(coordinate));
+                            .resolve(definition.get("path").getAsString());
 
             if (!Files.isRegularFile(library)) {
                 throw new IOException("Required library is missing: " + library);

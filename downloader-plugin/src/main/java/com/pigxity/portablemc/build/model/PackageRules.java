@@ -13,15 +13,15 @@ public final class PackageRules {
         JsonObject output = new JsonObject();
         output.add("arguments", packageJson.getAsJsonObject("arguments").deepCopy());
 
-        Map<String, JsonArray> rulesByCoordinate = new LinkedHashMap<>();
+        Map<String, JsonArray> rulesByPath = new LinkedHashMap<>();
         for (PackageDownloads.LibraryArtifact library : PackageDownloads.libraries(packageJson)) {
-            rulesByCoordinate.put(library.name(), library.rules().deepCopy());
+            rulesByPath.put(library.path(), library.rules().deepCopy());
         }
 
         JsonArray libraries = new JsonArray();
-        for (Map.Entry<String, JsonArray> entry : rulesByCoordinate.entrySet()) {
+        for (Map.Entry<String, JsonArray> entry : rulesByPath.entrySet()) {
             JsonObject library = new JsonObject();
-            library.addProperty("name", entry.getKey());
+            library.addProperty("path", entry.getKey());
             library.add("rules", entry.getValue());
             libraries.add(library);
         }

@@ -42,12 +42,15 @@ class PackageRulesTest {
         assertFalse(rules.has("mainClass"));
         assertFalse(rules.toString().contains("downloads"));
         assertFalse(rules.toString().contains("https://"));
+        assertTrue(
+                rules.getAsJsonArray("libraries").asList().stream()
+                        .noneMatch(element -> element.getAsJsonObject().has("name")));
         assertEquals(
-                "org.lwjgl:lwjgl:3.4.2:natives-windows-arm64",
+                "org/lwjgl/lwjgl/3.4.2/lwjgl-3.4.2-natives-windows-arm64.jar",
                 rules.getAsJsonArray("libraries")
                         .get(1)
                         .getAsJsonObject()
-                        .get("name")
+                        .get("path")
                         .getAsString());
         assertEquals(
                 "windows",

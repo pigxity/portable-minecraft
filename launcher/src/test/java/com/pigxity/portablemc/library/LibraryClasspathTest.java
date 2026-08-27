@@ -15,21 +15,20 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 class LibraryClasspathTest {
     @TempDir Path gameDirectory;
 
     @Test
-    void includesOnlyRuleAndArchitectureCompatibleLibraries() throws Exception {
-        String normal = "example:normal:1.0";
-        String windows = "example:native:1.0:natives-windows";
-        String arm64 = "example:native:1.0:natives-windows-arm64";
-        for (String coordinate : new String[] {normal, windows, arm64}) {
-            Path path =
-                    gameDirectory
-                            .resolve("libraries")
-                            .resolve(MavenCoordinates.libraryPath(coordinate));
+    void includesEveryLibraryAllowedByMojangRules() throws Exception {
+        String normal = "example/normal/1.0/normal-1.0.jar";
+        String windowsX86 = "example/native/1.0/native-1.0-natives-windows-x86.jar";
+        String windowsArm64 = "example/native/1.0/native-1.0-natives-windows-arm64.jar";
+        String linux = "example/native/1.0/native-1.0-natives-linux.jar";
+        for (String libraryPath : new String[] {normal, windowsX86, windowsArm64, linux}) {
+            Path path = gameDirectory.resolve("libraries").resolve(libraryPath);
             Files.createDirectories(path.getParent());
             Files.createFile(path);
         }
@@ -37,37 +36,43 @@ class LibraryClasspathTest {
         RuleEnvironment environment =
                 new RuleEnvironment(new OperatingSystem("windows", "10.0", "amd64"), Map.of());
         LibraryClasspath classpath =
-                new LibraryClasspath(
-                        gameDirectory,
-                        new RuleParser(),
-                        new RuleResolver(environment),
-                        environment.operatingSystem());
+                new LibraryClasspath(gameDirectory, new RuleParser(), new RuleResolver(environment));
 
         var paths =
                 classpath.resolve(
                         JsonParser.parseString(
                                         """
                                         [
-                                          {"name":"example:normal:1.0","rules":[]},
-                                          {"name":"example:native:1.0:natives-windows","rules":[{"action":"allow","os":{"name":"windows"}}]},
-                                          {"name":"example:native:1.0:natives-windows-arm64","rules":[{"action":"allow","os":{"name":"windows"}}]}
+                                          {"path":"example/normal/1.0/normal-1.0.jar","rules":[]},
+                                          {"path":"example/native/1.0/native-1.0-natives-windows-x86.jar","rules":[{"action":"allow","os":{"name":"windows"}}]},
+                                          {"path":"example/native/1.0/native-1.0-natives-windows-arm64.jar","rules":[{"action":"allow","os":{"name":"windows"}}]},
+                                          {"path":"example/native/1.0/native-1.0-natives-linux.jar","rules":[{"action":"allow","os":{"name":"linux"}}]}
                                         ]
                                         """)
                                 .getAsJsonArray());
 
-        assertEquals(2, paths.size());
+        assertEquals(
+                List.of(
+                        gameDirectory.resolve("libraries").resolve(normal).toAbsolutePath().normalize(),
+                        gameDirectory
+                                .resolve("libraries")
+                                .resolve(windowsX86)
+                                .toAbsolutePath()
+                                .normalize(),
+                        gameDirectory
+                                .resolve("libraries")
+                                .resolve(windowsArm64)
+                                .toAbsolutePath()
+                                .normalize()),
+                paths);
     }
 
     @Test
-    void validatesRulesEvenForAnIncompatibleClassifier() {
+    void rejectsUnsupportedMojangRules() {
         RuleEnvironment environment =
                 new RuleEnvironment(new OperatingSystem("windows", "10.0", "amd64"), Map.of());
         LibraryClasspath classpath =
-                new LibraryClasspath(
-                        gameDirectory,
-                        new RuleParser(),
-                        new RuleResolver(environment),
-                        environment.operatingSystem());
+                new LibraryClasspath(gameDirectory, new RuleParser(), new RuleResolver(environment));
 
         assertThrows(
                 UnsupportedRuleException.class,
@@ -75,7 +80,7 @@ class LibraryClasspathTest {
                         classpath.resolve(
                                 JsonParser.parseString(
                                                 """
-                                                [{"name":"example:native:1.0:natives-linux","rules":[{"action":"future"}]}]
+                                                [{"path":"example/native/1.0/native-1.0-natives-linux.jar","rules":[{"action":"future"}]}]
                                                 """)
                                         .getAsJsonArray()));
     }

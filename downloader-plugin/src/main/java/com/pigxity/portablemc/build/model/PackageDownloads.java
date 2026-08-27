@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public final class PackageDownloads {
@@ -29,7 +28,6 @@ public final class PackageDownloads {
 
         for (JsonElement element : packageJson.getAsJsonArray("libraries")) {
             JsonObject library = element.getAsJsonObject();
-            String coordinate = library.get("name").getAsString();
             JsonArray rules =
                     library.has("rules") ? library.getAsJsonArray("rules") : new JsonArray();
             JsonObject downloads = library.getAsJsonObject("downloads");
@@ -39,18 +37,13 @@ public final class PackageDownloads {
             }
 
             if (downloads.has("artifact")) {
-                result.add(
-                        libraryArtifact(coordinate, rules, downloads.getAsJsonObject("artifact")));
+                result.add(libraryArtifact(rules, downloads.getAsJsonObject("artifact")));
             }
 
             if (downloads.has("classifiers")) {
-                for (Map.Entry<String, JsonElement> classifier :
-                        downloads.getAsJsonObject("classifiers").entrySet()) {
-                    result.add(
-                            libraryArtifact(
-                                    withClassifier(coordinate, classifier.getKey()),
-                                    rules,
-                                    classifier.getValue().getAsJsonObject()));
+                for (JsonElement classifier :
+                        downloads.getAsJsonObject("classifiers").asMap().values()) {
+                    result.add(libraryArtifact(rules, classifier.getAsJsonObject()));
                 }
             }
         }
@@ -68,16 +61,6 @@ public final class PackageDownloads {
         return hashes;
     }
 
-    static String withClassifier(String coordinate, String classifier) {
-        String[] parts = coordinate.split(":");
-
-        if (parts.length < 3) {
-            throw new IllegalArgumentException("Unsupported Maven coordinate: " + coordinate);
-        }
-
-        return parts[0] + ":" + parts[1] + ":" + parts[2] + ":" + classifier;
-    }
-
     private static Download fromJson(String name, JsonObject json) {
         return new Download(
                 name,
@@ -86,19 +69,15 @@ public final class PackageDownloads {
                 json.get("sha1").getAsString());
     }
 
-    private static LibraryArtifact libraryArtifact(String name, JsonArray rules, JsonObject json) {
-        Download download = fromJson(name, json);
-
+    private static LibraryArtifact libraryArtifact(JsonArray rules, JsonObject json) {
         return new LibraryArtifact(
-                download.name(),
-                download.path(),
-                download.url(),
-                download.sha1(),
+                json.get("path").getAsString(),
+                json.get("url").getAsString(),
+                json.get("sha1").getAsString(),
                 rules.deepCopy());
     }
 
     public record Download(String name, String path, String url, String sha1) {}
 
-    public record LibraryArtifact(
-            String name, String path, String url, String sha1, JsonArray rules) {}
+    public record LibraryArtifact(String path, String url, String sha1, JsonArray rules) {}
 }
