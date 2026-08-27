@@ -1,5 +1,6 @@
-package com.pigxity.portablemc.archive;
+package com.pigxity.portablemc.platform;
 
+import com.pigxity.portablemc.Main;
 import com.pigxity.portablemc.shared.ContentHashes;
 
 import java.io.IOException;
@@ -42,8 +43,11 @@ public final class RuntimeArchive {
     }
 
     public void extractOverrides(Path destination) throws IOException {
-        Path root = destination.toAbsolutePath().normalize();
+        final long startTime = System.nanoTime();
+        int replacedFiles = 0;
+        int skippedFiles = 0;
 
+        Path root = destination.toAbsolutePath().normalize();
         Files.createDirectories(root);
 
         try (JarFile jar = new JarFile(archive.toFile())) {
@@ -73,9 +77,20 @@ public final class RuntimeArchive {
                     try (InputStream input = jar.getInputStream(entry)) {
                         Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
                     }
+
+                    replacedFiles++;
+                    continue;
                 }
+
+                skippedFiles++;
             }
         }
+
+        final long elapsedMillis = (System.nanoTime() - startTime) / 1_000_000;
+        final int total = skippedFiles + replacedFiles;
+
+        Main.log(String.format("Processed %d files in %dms; %d skipped (cached), %d replaced/extracted",
+                total, elapsedMillis, skippedFiles, replacedFiles));
     }
 
     private static boolean matches(JarFile jar, JarEntry entry, Path output) throws IOException {

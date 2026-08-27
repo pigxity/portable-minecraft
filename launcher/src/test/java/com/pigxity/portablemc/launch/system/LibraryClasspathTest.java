@@ -1,4 +1,4 @@
-package com.pigxity.portablemc.library;
+package com.pigxity.portablemc.launch.system;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

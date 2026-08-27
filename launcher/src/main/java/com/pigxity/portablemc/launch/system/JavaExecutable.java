@@ -1,12 +1,12 @@
-package com.pigxity.portablemc.launch;
+package com.pigxity.portablemc.launch.system;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-final class JavaExecutable {
+public final class JavaExecutable {
     private JavaExecutable() {}
 
-    static Path current() {
+    public static Path current() {
         Path bin = Path.of(System.getProperty("java.home"), "bin");
         Path executable = bin.resolve(isWindows() ? "java.exe" : "java");
         if (!Files.isRegularFile(executable)) {

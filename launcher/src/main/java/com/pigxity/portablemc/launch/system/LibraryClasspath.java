@@ -1,4 +1,4 @@
-package com.pigxity.portablemc.library;
+package com.pigxity.portablemc.launch.system;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
