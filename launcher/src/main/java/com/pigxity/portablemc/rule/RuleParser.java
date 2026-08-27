@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.pigxity.portablemc.rule.conditions.FeaturesCondition;
-import com.pigxity.portablemc.rule.conditions.OperatingSystemCondition;
+import com.pigxity.portablemc.rule.conditions.os.OperatingSystemCondition;
 import com.pigxity.portablemc.rule.model.Rule;
 import com.pigxity.portablemc.rule.model.RuleAction;
 import com.pigxity.portablemc.rule.model.RuleCondition;

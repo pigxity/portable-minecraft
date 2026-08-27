@@ -7,6 +7,7 @@ import java.util.Set;
 public record LauncherArguments(
         boolean showVersion,
         boolean showHelp,
+        boolean verbose,
         Map<String, String> variables,
         Set<String> features,
         List<String> jvmArguments,

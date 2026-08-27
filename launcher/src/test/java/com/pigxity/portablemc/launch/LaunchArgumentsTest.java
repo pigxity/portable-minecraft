@@ -43,6 +43,57 @@ class LaunchArgumentsTest {
     }
 
     @Test
+    void alwaysIncludesObjectDefinitionsWithoutRules() {
+        RuleEnvironment environment =
+                new RuleEnvironment(new OperatingSystem("windows", "10.0", "amd64"), Set.of());
+        LaunchArguments arguments =
+                new LaunchArguments(new RuleParser(), new RuleResolver(environment), Map.of());
+
+        List<String> result =
+                arguments.resolve(
+                        JsonParser.parseString(
+                                        """
+                                        [{"value":["-Xms2G","-Xmx4G"]}]
+                                        """)
+                                .getAsJsonArray());
+
+        assertEquals(List.of("-Xms2G", "-Xmx4G"), result);
+    }
+
+    @Test
+    void appliesDefaultPackagedAndUserJvmArgumentsInOrder() {
+        RuleEnvironment environment =
+                new RuleEnvironment(new OperatingSystem("windows", "10.0.19045", "amd64"), Set.of());
+        LaunchArguments arguments =
+                new LaunchArguments(new RuleParser(), new RuleResolver(environment), Map.of());
+        var definitions =
+                JsonParser.parseString(
+                                """
+                                {
+                                  "default-user-jvm":[{"value":["-Xms2G","-Xmx4G"]}],
+                                  "jvm":["-Drequired=true","-cp","client.jar"],
+                                  "game":["--username","Player"]
+                                }
+                                """)
+                        .getAsJsonObject();
+
+        LaunchOptions result =
+                arguments.resolveOptions(definitions)
+                        .merge(new LaunchOptions(List.of("-Xmx8G"), List.of()));
+
+        assertEquals(
+                List.of(
+                        "-Xms2G",
+                        "-Xmx4G",
+                        "-Drequired=true",
+                        "-cp",
+                        "client.jar",
+                        "-Xmx8G"),
+                result.jvmArguments());
+        assertEquals(List.of("--username", "Player"), result.minecraftArguments());
+    }
+
+    @Test
     void mergesFlagsAndValuesWhileAllowingAdditionalArgumentsToOverrideDefaults() {
         assertEquals(
                 List.of("--username", "Alex", "--fullscreen", "--width", "1280"),

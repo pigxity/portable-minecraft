@@ -65,7 +65,7 @@ public final class MinecraftLauncher {
         RuleParser ruleParser = new RuleParser();
         RuleResolver ruleResolver = new RuleResolver(environment);
 
-        Main.log("Loading libraries, OS: " + environment.operatingSystem());
+        Main.log("Parsing rules with OS data: " + environment.operatingSystem());
 
         List<Path> classpath =
                 new ArrayList<>(
@@ -93,16 +93,18 @@ public final class MinecraftLauncher {
         JsonObject argumentDefinitions = packageRules.getAsJsonObject("arguments");
 
         LaunchOptions launchOptions =
-                new LaunchOptions(
-                        arguments.resolve(argumentDefinitions.getAsJsonArray("jvm")),
-                        arguments.resolve(argumentDefinitions.getAsJsonArray("game")))
+                arguments.resolveOptions(argumentDefinitions)
+                        //adding user arguments after defaults overrides them (a jvm feature)
+                        //note that merge() only appends **jvm** arguments instead of replacing them.
                         .merge(new LaunchOptions(
                                 launcherArguments.jvmArguments(),
                                 launcherArguments.minecraftArguments())
                         );
 
-        Main.log("JVM arguments: " + launchOptions.jvmArguments());
-        Main.log("Minecraft arguments: " + launchOptions.minecraftArguments());
+        if (launcherArguments.verbose()) {
+            Main.log("JVM arguments: " + launchOptions.jvmArguments());
+            Main.log("Minecraft arguments: " + launchOptions.minecraftArguments());
+        }
 
         Main.log("Starting Minecraft in a new JVM!");
 

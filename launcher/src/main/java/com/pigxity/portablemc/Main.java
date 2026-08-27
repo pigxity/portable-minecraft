@@ -17,6 +17,7 @@ public class Main {
                     Flags:
                     --help: print this message
                     --version: print the version
+                    --verbose / v: enable verbose logging
                     
                     Arguments:
                     --feature x / -F x: boolean feature flag; conditionally enables specific Minecraft arguments.
@@ -30,6 +31,12 @@ public class Main {
         else if (launcherArgs.showVersion()) {
             IO.println("portable-minecraft version: " + Main.class.getPackage().getImplementationVersion());
             System.exit(1);
+        }
+
+        if (launcherArgs.verbose()) {
+            log("Feature args: " + launcherArgs.features());
+            log("Variable args: " + launcherArgs.variables());
+            log("JVM args: " + launcherArgs.jvmArguments());
         }
 
         new MinecraftLauncher().launch(Path.of("."), launcherArgs);

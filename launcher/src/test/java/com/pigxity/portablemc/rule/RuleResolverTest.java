@@ -54,6 +54,33 @@ class RuleResolverTest {
                 () -> parse("[{\"action\":\"allow\",\"os\":{\"version\":\"[\"}}]"));
     }
 
+    @Test
+    void resolvesInclusiveMinimumAndExclusiveMaximumOsVersionRanges() {
+        List<Rule> minimum =
+                parse(
+                        """
+                        [{"action":"allow","os":{"name":"windows","versionRange":{"min":"10.0.17134"}}}]
+                        """);
+        List<Rule> maximum =
+                parse(
+                        """
+                        [{"action":"allow","os":{"name":"windows","versionRange":{"max":"10.0.17134"}}}]
+                        """);
+
+        assertFalse(resolverFor("10.0.17133").isAllowed(minimum));
+        assertTrue(resolverFor("10.0.17134").isAllowed(minimum));
+        assertTrue(resolverFor("10.0.19045").isAllowed(minimum));
+
+        assertTrue(resolverFor("10.0.17133").isAllowed(maximum));
+        assertFalse(resolverFor("10.0.17134").isAllowed(maximum));
+        assertFalse(resolverFor("10.0.19045").isAllowed(maximum));
+    }
+
+    private RuleResolver resolverFor(String version) {
+        return new RuleResolver(
+                new RuleEnvironment(new OperatingSystem("windows", version, "amd64"), Set.of()));
+    }
+
     private List<Rule> parse(String json) {
         return parser.parse(JsonParser.parseString(json).getAsJsonArray());
     }

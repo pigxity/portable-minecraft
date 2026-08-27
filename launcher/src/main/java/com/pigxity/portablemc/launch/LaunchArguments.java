@@ -27,6 +27,24 @@ public final class LaunchArguments {
         this.substitutions = Map.copyOf(substitutions);
     }
 
+    public LaunchOptions resolveOptions(JsonObject definitions) {
+        return new LaunchOptions(
+                resolveSections(definitions, "default-user-jvm", "jvm"),
+                resolveSections(definitions, "game"));
+    }
+
+    public List<String> resolveSections(JsonObject definitions, String... sectionNames) {
+        List<String> arguments = new ArrayList<>();
+
+        for (String sectionName : sectionNames) {
+            if (definitions.has(sectionName)) {
+                arguments.addAll(resolve(definitions.getAsJsonArray(sectionName)));
+            }
+        }
+
+        return List.copyOf(arguments);
+    }
+
     public List<String> resolve(JsonArray definitions) {
         List<String> arguments = new ArrayList<>();
 
@@ -42,12 +60,13 @@ public final class LaunchArguments {
             }
 
             JsonObject conditional = definition.getAsJsonObject();
-            if (!conditional.has("rules") || !conditional.has("value")) {
+            if (!conditional.has("value")) {
                 throw new IllegalArgumentException(
-                        "Conditional argument requires rules and value: " + conditional);
+                        "Argument object requires a value: " + conditional);
             }
 
-            if (rules.isAllowed(ruleParser.parse(conditional.getAsJsonArray("rules")))) {
+            if (!conditional.has("rules")
+                    || rules.isAllowed(ruleParser.parse(conditional.getAsJsonArray("rules")))) {
                 addValue(arguments, conditional.get("value"));
             }
         }
