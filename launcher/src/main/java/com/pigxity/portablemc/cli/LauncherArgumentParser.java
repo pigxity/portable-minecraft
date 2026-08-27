@@ -8,6 +8,7 @@ public final class LauncherArgumentParser {
         boolean version = false;
         boolean help = false;
         boolean verbose = false;
+        boolean auth = false;
 
         Map<String, String> variables = new LinkedHashMap<>();
         Set<String> features = new LinkedHashSet<>();
@@ -36,7 +37,8 @@ public final class LauncherArgumentParser {
             switch (option) {
                 case "--version" -> version = true;
                 case "--help" -> help = true;
-                case "--verbose", "-v" -> verbose = true;
+                case "--verbose" -> verbose = true;
+                case "--auth" -> auth = true;
 
                 case "--variable", "-V" -> {
                     String value = inlineValue != null
@@ -66,7 +68,7 @@ public final class LauncherArgumentParser {
             }
         }
 
-        return new LauncherArguments(version, help, verbose, variables, features, jvmArguments, minecraftArguments);
+        return new LauncherArguments(version, help, verbose, auth, variables, features, jvmArguments, minecraftArguments);
     }
 
     private static void unknownArg(String argument) {

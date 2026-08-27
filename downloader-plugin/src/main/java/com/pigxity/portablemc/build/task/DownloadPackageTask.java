@@ -1,8 +1,8 @@
 package com.pigxity.portablemc.build.task;
 
-import com.pigxity.portablemc.build.io.JsonFiles;
 import com.pigxity.portablemc.build.model.MinecraftPackage;
 import com.pigxity.portablemc.build.model.PackageRules;
+import com.pigxity.portablemc.shared.JsonFiles;
 
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;

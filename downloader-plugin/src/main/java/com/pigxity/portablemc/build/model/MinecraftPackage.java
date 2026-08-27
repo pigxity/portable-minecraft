@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.pigxity.portablemc.build.cache.MinecraftCache;
 import com.pigxity.portablemc.build.download.VerifiedDownloader;
-import com.pigxity.portablemc.build.io.JsonFiles;
+import com.pigxity.portablemc.shared.JsonFiles;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -20,7 +20,8 @@ repositories {
 
 dependencies {
     implementation(project(":shared"))
-    implementation("com.google.code.gson:gson:2.13.2")
+    implementation("com.google.code.gson:gson:2.13.1")
+    implementation("net.raphimc:MinecraftAuth:5.0.2")
 
     testImplementation(platform("org.junit:junit-bom:5.13.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")

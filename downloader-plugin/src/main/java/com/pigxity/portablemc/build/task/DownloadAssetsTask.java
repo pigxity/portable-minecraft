@@ -3,8 +3,8 @@ package com.pigxity.portablemc.build.task;
 import com.google.gson.JsonObject;
 import com.pigxity.portablemc.build.download.DownloadBatch;
 import com.pigxity.portablemc.build.download.VerifiedDownloader;
-import com.pigxity.portablemc.build.io.JsonFiles;
 import com.pigxity.portablemc.build.model.PackageDownloads;
+import com.pigxity.portablemc.shared.JsonFiles;
 
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.DisableCachingByDefault;

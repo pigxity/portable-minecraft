@@ -2,11 +2,11 @@ package com.pigxity.portablemc.build.task;
 
 import com.google.gson.JsonObject;
 import com.pigxity.portablemc.build.io.FileTrees;
-import com.pigxity.portablemc.build.io.JsonFiles;
 import com.pigxity.portablemc.build.model.MinecraftPackage;
 import com.pigxity.portablemc.build.model.PackageDownloads;
 import com.pigxity.portablemc.shared.ClientMetadata;
 import com.pigxity.portablemc.shared.PropertiesFile;
+import com.pigxity.portablemc.shared.JsonFiles;
 
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.OutputDirectory;

@@ -1,4 +1,4 @@
-package com.pigxity.portablemc.build.io;
+package com.pigxity.portablemc.shared;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -24,9 +24,10 @@ public final class JsonFiles {
     }
 
     public static void write(Path path, JsonObject object) throws IOException {
-        Files.createDirectories(path.getParent());
+        Path absolutePath = path.toAbsolutePath();
+        Files.createDirectories(absolutePath.getParent());
 
-        try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+        try (Writer writer = Files.newBufferedWriter(absolutePath, StandardCharsets.UTF_8)) {
             PRETTY_GSON.toJson(object, writer);
         }
     }

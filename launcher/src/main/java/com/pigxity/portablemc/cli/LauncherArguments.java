@@ -8,6 +8,8 @@ public record LauncherArguments(
         boolean showVersion,
         boolean showHelp,
         boolean verbose,
+        boolean auth,
+
         Map<String, String> variables,
         Set<String> features,
         List<String> jvmArguments,
